@@ -1,13 +1,10 @@
-from pathlib import Path
-
-
-KNOWLEDGE_DIR = Path("knowledge")
+from app.services.knowledge_service import retrieve_best_match
 
 
 TOPIC_KEYWORDS = {
-    "docker": ["docker", "container", "image", "dockerfile"],
+    "docker": ["docker", "container", "image", "dockerfile", "compose", "daemon", "port"],
     "git": ["git", "commit", "branch", "merge", "push", "pull"],
-    "python": ["python", "pip", "venv", "module", "package"],
+    "python": ["python", "pip", "venv", "module", "package", "error"],
     "fastapi": ["fastapi", "api", "endpoint", "uvicorn"],
     "pytorch": ["pytorch", "torch", "tensor", "training loop"],
 }
@@ -17,20 +14,10 @@ def detect_topic(message: str) -> str | None:
     message_lower = message.lower()
 
     for topic, keywords in TOPIC_KEYWORDS.items():
-        for keyword in keywords:
-            if keyword in message_lower:
-                return topic
+        if any(keyword in message_lower for keyword in keywords):
+            return topic
 
     return None
-
-
-def load_knowledge(topic: str) -> str | None:
-    file_path = KNOWLEDGE_DIR / f"{topic}.md"
-
-    if not file_path.exists():
-        return None
-
-    return file_path.read_text(encoding="utf-8")
 
 
 def handle_chat(mode: str, message: str):
@@ -42,23 +29,19 @@ def handle_chat(mode: str, message: str):
             "suggestion": "Try asking about Docker, Git, Python, FastAPI, or PyTorch."
         }
 
-    knowledge = load_knowledge(topic)
+    match = retrieve_best_match(topic=topic, message=message)
 
-    if knowledge is None:
+    if match is None:
         return {
-            "error": f"I detected the topic '{topic}', but I do not have a knowledge file for it yet.",
-            "suggestion": f"Create knowledge/{topic}.md"
-        }
-
-    if mode == "learn":
-        return {
-            "mode": "learn",
-            "topic": topic,
-            "source": f"knowledge/{topic}.md",
-            "content": knowledge
+            "error": f"I detected the topic '{topic}', but could not find a specific knowledge chunk.",
+            "suggestion": f"Add more markdown files under knowledge/{topic}/"
         }
 
     return {
-        "message": f"Mode '{mode}' is not implemented yet.",
-        "detected_topic": topic
+        "mode": mode,
+        "topic": topic,
+        "category": match["category"],
+        "source": match["path"],
+        "score": match["score"],
+        "content": match["content"]
     }

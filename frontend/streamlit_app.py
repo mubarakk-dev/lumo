@@ -13,7 +13,7 @@ st.subheader("Learn. Build. Deploy.")
 
 mode = st.selectbox(
     "Choose Mode",
-    ["learn", "generate", "troubleshoot"]
+    ["learn", "generate", "troubleshoot", "cheatsheet"]
 )
 
 user_input = st.text_input(

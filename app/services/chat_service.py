@@ -1,8 +1,24 @@
-from app.services.knowledge_service import retrieve_best_match
+from app.services.knowledge_service import retrieve_top_matches
 
 
 TOPIC_KEYWORDS = {
-    "docker": ["docker", "container", "image", "dockerfile", "compose", "daemon", "port"],
+    "docker": [
+        "docker",
+        "container",
+        "containers",
+        "image",
+        "images",
+        "dockerfile",
+        "compose",
+        "daemon",
+        "port",
+        "ports",
+        "volume",
+        "volumes",
+        "network",
+        "networks",
+        "nginx",
+    ],
     "git": ["git", "commit", "branch", "merge", "push", "pull"],
     "python": ["python", "pip", "venv", "module", "package", "error"],
     "fastapi": ["fastapi", "api", "endpoint", "uvicorn"],
@@ -20,28 +36,50 @@ def detect_topic(message: str) -> str | None:
     return None
 
 
-def handle_chat(mode: str, message: str):
+def combine_matches(matches: list[dict]) -> str:
+    combined_content = ""
+
+    for match in matches:
+        combined_content += f"""
+
+{match["content"]}
+
+"""
+
+    return combined_content.strip()
+
+
+def handle_chat(message: str):
     topic = detect_topic(message)
 
     if topic is None:
         return {
             "error": "I could not detect the topic.",
-            "suggestion": "Try asking about Docker, Git, Python, FastAPI, or PyTorch."
+            "suggestion": "Try asking about Docker."
         }
 
-    match = retrieve_best_match(topic=topic, message=message)
+    matches = retrieve_top_matches(
+        topic=topic,
+        message=message,
+        k=3
+    )
 
-    if match is None:
+    if not matches:
         return {
             "error": f"I detected the topic '{topic}', but could not find a specific knowledge chunk.",
             "suggestion": f"Add more markdown files under knowledge/{topic}/"
         }
 
     return {
-        "mode": mode,
         "topic": topic,
-        "category": match["category"],
-        "source": match["path"],
-        "score": match["score"],
-        "content": match["content"]
+        "top_k": len(matches),
+        "sources": [
+            {
+                "path": match["path"],
+                "category": match["category"],
+                "score": match["score"],
+            }
+            for match in matches
+        ],
+        "content": combine_matches(matches)
     }

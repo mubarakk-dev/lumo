@@ -23,7 +23,6 @@ def health():
 def chat(request: ChatRequest):
 
     response = handle_chat(
-        mode=request.mode,
         message=request.message
     )
 

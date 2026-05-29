@@ -9,21 +9,16 @@ st.set_page_config(
 )
 
 st.title("💡 Lumo")
-st.subheader("Learn. Build. Deploy.")
+st.subheader("Your AI Docker Companion.")
 
-mode = st.selectbox(
-    "Choose Mode",
-    ["learn", "generate", "troubleshoot", "cheatsheet"]
-)
 
 user_input = st.text_input(
-    "Ask Lumo something..."
+    "Ask me anything about Docker..."
 )
 
 if st.button("Send"):
 
-    payload = {
-        "mode": mode,
+    payload = { 
         "message": user_input
     }
 

@@ -46,13 +46,10 @@ def score_file(message: str, file_data: dict) -> int:
     filename = file_data["filename"].lower()
     category = file_data["category"].lower()
     content = file_data["content"].lower()
-    path = file_data["path"].lower()
 
     score = 0
 
     # Strong phrase / meaning boosts
-
-        # Exact definition boosts
     if "what is docker compose" in message_lower or "explain docker compose" in message_lower:
         if "what is docker compose" in filename:
             score += 200

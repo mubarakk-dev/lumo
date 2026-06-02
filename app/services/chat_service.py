@@ -25,7 +25,6 @@ TOPIC_KEYWORDS = {
         "environment variables",
         "nginx",
     ],
-    
 }
 
 
@@ -49,16 +48,7 @@ def detect_topic(message: str) -> str | None:
 
 
 def combine_matches(matches: list[dict]) -> str:
-    combined_content = ""
-
-    for match in matches:
-        combined_content += f"""
-
-{match["content"]}
-
-"""
-
-    return combined_content.strip()
+    return "\n\n".join(match["content"] for match in matches).strip()
 
 
 def handle_chat(message: str):
@@ -74,36 +64,12 @@ def handle_chat(message: str):
     retrieval_k = get_retrieval_k(intent)
     preferred_category = INTENT_TO_CATEGORY.get(intent)
 
-    print(f"Intent: {intent}")
-    print(f"Preferred category: {preferred_category}")
-    
     matches = retrieve_top_matches(
         topic=topic,
         message=message,
         k=retrieval_k,
         preferred_category=preferred_category,
     )
-
-    if not matches:
-        return {
-            "error": f"I detected the topic '{topic}', but could not find a specific knowledge chunk.",
-            "suggestion": f"Add more markdown files under knowledge/{topic}/"
-        }
-
-    return {
-        "topic": topic,
-        "intent": intent,
-        "top_k": len(matches),
-        "sources": [
-            {
-                "path": match["path"],
-                "category": match["category"],
-                "score": match["score"],
-            }
-            for match in matches
-        ],
-        "content": combine_matches(matches)
-    }
 
     if not matches:
         return {

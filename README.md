@@ -1,72 +1,62 @@
-# Lumo 💡
+# Lumo
 
-**Lumo** is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured knowledge retrieval system.
+Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured knowledge retrieval system.
 
 ## Project Overview
 
-Lumo began as a simple chatbot but evolved into a retrieval-based AI assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from a structured collection of Markdown files and ranks them based on the user's query.
+Lumo began as a simple chatbot and evolved into a retrieval-based assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from Markdown files and ranks them based on the user's query.
 
-The project was built to explore the foundations of AI retrieval systems, knowledge architecture, and Retrieval-Augmented Generation (RAG).
-
----
+The project explores the foundations of retrieval systems, knowledge architecture, and Retrieval-Augmented Generation (RAG).
 
 ## Features
 
 ### Learn Docker Concepts
 
-Examples:
+Example questions:
 
-* What is Docker?
-* What are Docker volumes?
-* What is the difference between images and containers?
-* What are multi-stage builds?
+- What is Docker?
+- What are Docker volumes?
+- What is the difference between images and containers?
+- What are multi-stage builds?
 
 ### Generate Docker Solutions
 
-Examples:
+Example requests:
 
-* Build a Docker image
-* Run a container
-* Create a Docker Compose setup
-* Generate a FastAPI Dockerfile
+- Build a Docker image
+- Run a container
+- Create a Docker Compose setup
+- Generate a FastAPI Dockerfile
 
 ### Troubleshoot Docker Issues
 
-Examples:
+Example problems:
 
-* Docker daemon not running
-* Port already in use
-* Container exits immediately
-* Docker image build failures
-* Network connectivity issues
+- Docker daemon not running
+- Port already in use
+- Container exits immediately
+- Docker image build failures
+- Network connectivity issues
 
 ### Docker Cheat Sheets
 
-Examples:
+Example requests:
 
-* Docker commands
-* Docker cleanup commands
-* Dockerfile instructions
-
----
+- Docker commands
+- Docker cleanup commands
+- Dockerfile instructions
 
 ## Architecture
 
 ```text
 User Query
-     ↓
-Topic Detection
-     ↓
-Knowledge Retrieval
-     ↓
-Relevance Ranking
-     ↓
-Top-K Filtering
-     ↓
-Response Generation
+  -> Topic Detection
+  -> Intent Detection
+  -> Knowledge Retrieval
+  -> Relevance Ranking
+  -> Top-K Filtering
+  -> Response Assembly
 ```
-
----
 
 ## Knowledge Base Structure
 
@@ -81,96 +71,97 @@ knowledge/
 
 Each Docker concept is stored as a separate Markdown file to improve maintainability, retrieval quality, and scalability.
 
----
-
 ## Tech Stack
 
-### Backend
+- Backend: FastAPI
+- Frontend: Streamlit
+- Language: Python
+- Knowledge storage: Markdown
+- Retrieval: custom keyword-based retrieval engine with intent-aware scoring
 
-* FastAPI
+## Running The App
 
-### Frontend
+Create and activate a virtual environment:
 
-* Streamlit
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements-dev.txt
+```
 
-### Language
+Start the API:
 
-* Python
+```bash
+uvicorn app.main:app --reload
+```
 
-### Knowledge Storage
+Start the Streamlit frontend in another terminal:
 
-* Markdown-based knowledge chunks
+```bash
+streamlit run frontend/streamlit_app.py
+```
 
-### Retrieval
+## Running Tests
 
-* Custom keyword-based retrieval engine
-* Intent-aware scoring
-* Top-K retrieval
-* Relevance filtering
+```bash
+python -m unittest discover -s tests
+```
 
----
+The current tests pin representative retrieval behavior before the project moves to embeddings and semantic search.
 
-## Key Concepts Explored
+## Retrieval Evaluation
 
-* Knowledge Chunking
-* Information Retrieval
-* Relevance Ranking
-* Precision vs Recall
-* Top-K Retrieval
-* Intent Detection
-* AI System Design
-* Foundations of Retrieval-Augmented Generation (RAG)
+Run the retrieval baseline:
 
----
+```bash
+python scripts/evaluate_retrieval.py
+```
+
+The evaluation cases live in `eval/retrieval_cases.json`. Each case defines a query, expected intent, preferred category, and expected source file. This gives the project a measurable baseline before adding embeddings, vector search, and hybrid retrieval.
 
 ## Current Status
 
-### Completed
+Completed:
 
-* FastAPI backend
-* Streamlit frontend
-* Docker knowledge base
-* Topic detection
-* Retrieval engine
-* Ranking system
-* Top-K retrieval
-* Troubleshooting knowledge modules
+- FastAPI backend
+- Streamlit frontend
+- Docker knowledge base
+- Topic detection
+- Intent detection
+- Keyword retrieval engine
+- Ranking system
+- Top-K retrieval
+- Retrieval baseline tests
+- Retrieval evaluation script
 
-### In Progress
+In progress:
 
-* Retrieval quality improvements
-* Knowledge base expansion
+- Retrieval quality improvements
+- Knowledge base expansion
+- Production-style project structure
 
-### Planned
+Planned:
 
-* Embedding-based retrieval
-* Semantic search
-* Conversation memory
-* Source attribution
-* Additional domains (Git, FastAPI, Kubernetes, CI/CD)
-
----
+- Embedding-based retrieval
+- Vector search
+- Hybrid retrieval
+- Source-grounded answer generation
+- Conversation memory
+- Additional domains such as Git, FastAPI, Kubernetes, CI/CD, and cloud platforms
 
 ## Example Questions
 
 ```text
 What is Docker?
-
 How do I build a Docker image?
-
 Docker daemon is not running.
-
 How do Docker volumes work?
-
 Why can't my containers communicate with each other?
-
 Give me a FastAPI Dockerfile template.
 ```
 
----
-
 ## Vision
 
-Lumo aims to become a practical AI engineering assistant capable of helping developers learn, build, deploy, and troubleshoot modern engineering tools.
+Lumo aims to become a practical AI engineering assistant that helps developers learn, build, deploy, and troubleshoot modern engineering tools.
 
-The first phase focuses exclusively on Docker, with future support planned for Git, FastAPI, Kubernetes, CI/CD, cloud platforms, and AI engineering workflows.
+The first phase focuses on Docker. Future phases can expand into Git, FastAPI, Kubernetes, CI/CD, cloud platforms, and AI engineering workflows.

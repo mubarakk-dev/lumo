@@ -2,6 +2,15 @@ def detect_query_intent(message: str) -> str:
     message_lower = message.lower().strip()
 
     if (
+        "cheat sheet" in message_lower
+        or "cheatsheet" in message_lower
+        or "commands" in message_lower
+        or "list commands" in message_lower
+        or "list dockerfile instructions" in message_lower
+    ):
+        return "cheatsheet"
+
+    if (
         message_lower.startswith("what is")
         or message_lower.startswith("what are")
         or message_lower.startswith("explain")
@@ -23,6 +32,7 @@ def detect_query_intent(message: str) -> str:
         or "failed" in message_lower
         or "cannot" in message_lower
         or "can't" in message_lower
+        or "not running" in message_lower
         or "not starting" in message_lower
         or "not loading" in message_lower
         or "keeps failing" in message_lower
@@ -33,6 +43,9 @@ def detect_query_intent(message: str) -> str:
         or "troubleshoot" in message_lower
         or "issue" in message_lower
         or "problem" in message_lower
+        or "allocated" in message_lower
+        or "exits" in message_lower
+        or "missing" in message_lower
     ):
         return "troubleshooting"
 
@@ -45,14 +58,6 @@ def detect_query_intent(message: str) -> str:
         or "dockerfile" in message_lower
     ):
         return "generation"
-
-    if (
-        "cheat sheet" in message_lower
-        or "cheatsheet" in message_lower
-        or "commands" in message_lower
-        or "list commands" in message_lower
-    ):
-        return "cheatsheet"
 
     if " and " in message_lower:
         return "multi_part"

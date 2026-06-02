@@ -1,0 +1,86 @@
+[
+  {
+    "id": "docker_definition",
+    "query": "What is Docker?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/what_is_docker.md"
+  },
+  {
+    "id": "compose_definition",
+    "query": "What is Docker Compose?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/what_is_docker_compose.md"
+  },
+  {
+    "id": "dockerfile_definition",
+    "query": "Explain Dockerfile",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/what_is_dockerfile.md"
+  },
+  {
+    "id": "daemon_not_running",
+    "query": "Docker daemon is not running",
+    "expected_intent": "troubleshooting",
+    "preferred_category": "troubleshoot",
+    "expected_source": "knowledge/docker/troubleshoot/docker_daemon.md"
+  },
+  {
+    "id": "port_allocated",
+    "query": "Port already allocated",
+    "expected_intent": "troubleshooting",
+    "preferred_category": "troubleshoot",
+    "expected_source": "knowledge/docker/troubleshoot/port_already_in_use.md"
+  },
+  {
+    "id": "network_connectivity",
+    "query": "Why can't my containers communicate with each other?",
+    "expected_intent": "troubleshooting",
+    "preferred_category": "troubleshoot",
+    "expected_source": "knowledge/docker/troubleshoot/network_connectivity.md"
+  },
+  {
+    "id": "container_exits",
+    "query": "My container exits immediately",
+    "expected_intent": "troubleshooting",
+    "preferred_category": "troubleshoot",
+    "expected_source": "knowledge/docker/troubleshoot/container_exits.md"
+  },
+  {
+    "id": "environment_variables_issue",
+    "query": "My Docker environment variables are missing",
+    "expected_intent": "troubleshooting",
+    "preferred_category": "troubleshoot",
+    "expected_source": "knowledge/docker/troubleshoot/environment_variable_issues.md"
+  },
+  {
+    "id": "fastapi_dockerfile",
+    "query": "Give me a FastAPI Dockerfile template",
+    "expected_intent": "generation",
+    "preferred_category": "generate",
+    "expected_source": "knowledge/docker/generate/dockerfile_template.md"
+  },
+  {
+    "id": "compose_yaml",
+    "query": "Create a Docker Compose YAML file",
+    "expected_intent": "generation",
+    "preferred_category": "generate",
+    "expected_source": "knowledge/docker/generate/docker_compose.md"
+  },
+  {
+    "id": "cleanup_commands",
+    "query": "Docker cleanup commands",
+    "expected_intent": "cheatsheet",
+    "preferred_category": "cheatsheets",
+    "expected_source": "knowledge/docker/cheatsheets/cleanup.md"
+  },
+  {
+    "id": "dockerfile_instructions",
+    "query": "List Dockerfile instructions",
+    "expected_intent": "cheatsheet",
+    "preferred_category": "cheatsheets",
+    "expected_source": "knowledge/docker/cheatsheets/dockerfile_instructions.md"
+  }
+]

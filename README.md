@@ -1,18 +1,18 @@
-Lumo 💡
+# Lumo 💡
 
-Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured knowledge retrieval system.
+**Lumo** is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured knowledge retrieval system.
 
-Project Overview
+## Project Overview
 
-Lumo began as a simple chatbot but evolved into a retrieval-based AI assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from a structured collection of Markdown files and ranks them based on the user’s query.
+Lumo began as a simple chatbot but evolved into a retrieval-based AI assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from a structured collection of Markdown files and ranks them based on the user's query.
 
 The project was built to explore the foundations of AI retrieval systems, knowledge architecture, and Retrieval-Augmented Generation (RAG).
 
-⸻
+---
 
-Features
+## Features
 
-Learn Docker Concepts
+### Learn Docker Concepts
 
 Examples:
 
@@ -21,7 +21,7 @@ Examples:
 * What is the difference between images and containers?
 * What are multi-stage builds?
 
-Generate Docker Solutions
+### Generate Docker Solutions
 
 Examples:
 
@@ -30,7 +30,7 @@ Examples:
 * Create a Docker Compose setup
 * Generate a FastAPI Dockerfile
 
-Troubleshoot Docker Issues
+### Troubleshoot Docker Issues
 
 Examples:
 
@@ -40,7 +40,7 @@ Examples:
 * Docker image build failures
 * Network connectivity issues
 
-Docker Cheat Sheets
+### Docker Cheat Sheets
 
 Examples:
 
@@ -48,10 +48,11 @@ Examples:
 * Docker cleanup commands
 * Dockerfile instructions
 
-⸻
+---
 
-Architecture
+## Architecture
 
+```text
 User Query
      ↓
 Topic Detection
@@ -63,50 +64,53 @@ Relevance Ranking
 Top-K Filtering
      ↓
 Response Generation
+```
 
-⸻
+---
 
-Knowledge Base Structure
+## Knowledge Base Structure
 
+```text
 knowledge/
 └── docker/
     ├── learn/
     ├── generate/
     ├── troubleshoot/
     └── cheatsheets/
+```
 
 Each Docker concept is stored as a separate Markdown file to improve maintainability, retrieval quality, and scalability.
 
-⸻
+---
 
-Tech Stack
+## Tech Stack
 
-Backend
+### Backend
 
 * FastAPI
 
-Frontend
+### Frontend
 
 * Streamlit
 
-Language
+### Language
 
 * Python
 
-Knowledge Storage
+### Knowledge Storage
 
 * Markdown-based knowledge chunks
 
-Retrieval
+### Retrieval
 
 * Custom keyword-based retrieval engine
 * Intent-aware scoring
 * Top-K retrieval
 * Relevance filtering
 
-⸻
+---
 
-Key Concepts Explored
+## Key Concepts Explored
 
 * Knowledge Chunking
 * Information Retrieval
@@ -117,11 +121,11 @@ Key Concepts Explored
 * AI System Design
 * Foundations of Retrieval-Augmented Generation (RAG)
 
-⸻
+---
 
-Current Status
+## Current Status
 
-Completed
+### Completed
 
 * FastAPI backend
 * Streamlit frontend
@@ -132,25 +136,41 @@ Completed
 * Top-K retrieval
 * Troubleshooting knowledge modules
 
-In Progress
+### In Progress
 
 * Retrieval quality improvements
 * Knowledge base expansion
 
-Planned
+### Planned
 
 * Embedding-based retrieval
 * Semantic search
 * Conversation memory
 * Source attribution
+* Additional domains (Git, FastAPI, Kubernetes, CI/CD)
 
-⸻
+---
 
-Example Questions
+## Example Questions
 
+```text
 What is Docker?
+
 How do I build a Docker image?
+
 Docker daemon is not running.
+
 How do Docker volumes work?
+
 Why can't my containers communicate with each other?
+
 Give me a FastAPI Dockerfile template.
+```
+
+---
+
+## Vision
+
+Lumo aims to become a practical AI engineering assistant capable of helping developers learn, build, deploy, and troubleshoot modern engineering tools.
+
+The first phase focuses exclusively on Docker, with future support planned for Git, FastAPI, Kubernetes, CI/CD, cloud platforms, and AI engineering workflows.

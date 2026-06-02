@@ -55,3 +55,8 @@ services:
 
 ## Common Mistake
 Changing the Dockerfile but running `docker-compose up` without `--build`.
+
+## Related Questions
+- How to build a docker compose?
+- Show me an example of Docker Compose.
+- Provide an example of Docker Compose.

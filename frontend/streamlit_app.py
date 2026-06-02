@@ -28,7 +28,13 @@ if st.button("Send"):
 
         data = response.json()
 
-        st.success("Lumo response")
+        if "intent" in data:
+            st.caption(f"Detected intent: {data['intent']}")
+
+        if "topic" in data:
+            st.caption(f"Detected topic: {data['topic']}")
+        
+            st.success("Lumo response")
 
         if "content" in data:
             st.markdown(data["content"])

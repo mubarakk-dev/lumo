@@ -21,10 +21,5 @@ def health():
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-
-    response = handle_chat(
-        message=request.message
-    )
-
+    response = handle_chat(request.message)
     return response
-   

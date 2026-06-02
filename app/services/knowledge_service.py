@@ -52,6 +52,19 @@ def score_file(message: str, file_data: dict) -> int:
 
     # Strong phrase / meaning boosts
 
+        # Exact definition boosts
+    if "what is docker compose" in message_lower or "explain docker compose" in message_lower:
+        if "what is docker compose" in filename:
+            score += 200
+        if "compose vs dockerfile" in filename:
+            score -= 100
+
+    if "what is dockerfile" in message_lower or "what is a dockerfile" in message_lower or "explain dockerfile" in message_lower:
+        if "what is dockerfile" in filename:
+            score += 200
+        if "compose vs dockerfile" in filename:
+            score -= 100
+
     if "daemon not running" in message_lower and "daemon" in filename:
         score += 120
 
@@ -146,6 +159,24 @@ def score_file(message: str, file_data: dict) -> int:
         if "dockerfile" in filename:
             score += 120
 
+    if ".env" in message_lower or "env file" in message_lower:
+        if "environment variables" in filename:
+            score += 160
+        if category == "cheatsheets":
+            score -= 80
+
+    if "environment variable" in message_lower or "environment variables" in message_lower:
+        if "environment variables" in filename:
+            score += 140
+        if "environment variable issues" in filename and (
+            "not working" in message_lower
+            or "missing" in message_lower
+            or "ignored" in message_lower
+            or "issue" in message_lower
+            or "problem" in message_lower
+        ):
+            score += 160
+    
     if "best practices" in message_lower or "secure" in message_lower or "security" in message_lower:
         if "best practices" in filename:
             score += 120
@@ -189,7 +220,12 @@ def score_file(message: str, file_data: dict) -> int:
     return score
 
 
-def retrieve_top_matches(topic: str, message: str, k: int = 3) -> list[dict]:
+def retrieve_top_matches(
+    topic: str,
+    message: str,
+    k: int = 3,
+    preferred_category: str | None = None,
+) -> list[dict]:
     files = load_markdown_files(topic)
 
     if not files:
@@ -210,6 +246,16 @@ def retrieve_top_matches(topic: str, message: str, k: int = 3) -> list[dict]:
 
     if not scored_files:
         return []
+
+    # Prefer files from the intent category if they exist
+    if preferred_category is not None:
+        category_matches = [
+            item for item in scored_files
+            if item["category"] == preferred_category
+        ]
+
+        if category_matches:
+            scored_files = category_matches
 
     scored_files.sort(key=lambda item: item["score"], reverse=True)
 

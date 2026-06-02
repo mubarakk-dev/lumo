@@ -117,7 +117,42 @@ Run the retrieval baseline:
 python scripts/evaluate_retrieval.py
 ```
 
+Compare retrieval modes:
+
+```bash
+python scripts/evaluate_retrieval.py --retriever keyword
+python scripts/evaluate_retrieval.py --retriever semantic
+python scripts/evaluate_retrieval.py --compare
+```
+
 The evaluation cases live in `eval/retrieval_cases.json`. Each case defines a query, expected intent, preferred category, and expected source file. This gives the project a measurable baseline before adding embeddings, vector search, and hybrid retrieval.
+
+## Semantic Retrieval
+
+Build the local vector index:
+
+```bash
+python scripts/build_vector_index.py
+```
+
+Build a Chroma index with SentenceTransformers:
+
+```bash
+python scripts/build_vector_index.py --embedding-provider sentence_transformers
+```
+
+Evaluate the Chroma retriever with SentenceTransformers:
+
+```bash
+python scripts/evaluate_retrieval.py --retriever chroma --embedding-provider sentence_transformers
+python scripts/evaluate_retrieval.py --compare --embedding-provider sentence_transformers
+```
+
+The generated index is stored under `.lumo_index/` and is ignored by Git. The current semantic retrieval layer uses local deterministic embeddings and cosine similarity so the vector-search architecture is easy to inspect and test. This creates the retrieval interface needed to later plug in model-backed embeddings and a production vector store such as ChromaDB or pgvector.
+
+The vector index stores metadata such as schema version, topic, embedding provider, embedding dimensions, and chunk count. This makes the generated index easier to inspect and safer to evolve as retrieval changes.
+
+ChromaDB stores its generated database under `.chroma/`, which is also ignored by Git. The app supports `retrieval_mode="chroma"` and lets the caller choose `embedding_provider="local_hashing"` or `embedding_provider="sentence_transformers"`.
 
 ## Current Status
 
@@ -133,18 +168,19 @@ Completed:
 - Top-K retrieval
 - Retrieval baseline tests
 - Retrieval evaluation script
+- Local semantic retrieval mode
+- Local vector index build script
 
 In progress:
 
-- Retrieval quality improvements
-- Knowledge base expansion
-- Production-style project structure
+- Model-backed embeddings
+- Vector database integration
+- Hybrid retrieval
 
 Planned:
 
 - Embedding-based retrieval
-- Vector search
-- Hybrid retrieval
+- Production vector search
 - Source-grounded answer generation
 - Conversation memory
 - Additional domains such as Git, FastAPI, Kubernetes, CI/CD, and cloud platforms

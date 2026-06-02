@@ -19,4 +19,8 @@ def health():
 
 @router.post("/chat")
 def chat(request: ChatRequest):
-    return handle_chat(request.message)
+    return handle_chat(
+        message=request.message,
+        retrieval_mode=request.retrieval_mode,
+        embedding_provider=request.embedding_provider,
+    )

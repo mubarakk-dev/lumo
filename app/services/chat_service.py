@@ -1,5 +1,7 @@
+from app.services.chroma_retrieval_service import retrieve_chroma_matches
 from app.services.knowledge_service import retrieve_top_matches
 from app.services.query_service import detect_query_intent, get_retrieval_k
+from app.services.semantic_retrieval_service import retrieve_semantic_matches
 
 
 TOPIC_KEYWORDS = {
@@ -37,6 +39,13 @@ INTENT_TO_CATEGORY = {
 }
 
 
+RETRIEVERS = {
+    "chroma": retrieve_chroma_matches,
+    "keyword": retrieve_top_matches,
+    "semantic": retrieve_semantic_matches,
+}
+
+
 def detect_topic(message: str) -> str | None:
     message_lower = message.lower()
 
@@ -51,7 +60,31 @@ def combine_matches(matches: list[dict]) -> str:
     return "\n\n".join(match["content"] for match in matches).strip()
 
 
-def handle_chat(message: str):
+def build_sources(matches: list[dict]) -> list[dict]:
+    sources = []
+    seen_paths = set()
+
+    for match in matches:
+        if match["path"] in seen_paths:
+            continue
+
+        seen_paths.add(match["path"])
+        sources.append(
+            {
+                "path": match["path"],
+                "category": match["category"],
+                "score": match["score"],
+            }
+        )
+
+    return sources
+
+
+def handle_chat(
+    message: str,
+    retrieval_mode: str = "keyword",
+    embedding_provider: str = "local_hashing",
+):
     topic = detect_topic(message)
 
     if topic is None:
@@ -63,13 +96,25 @@ def handle_chat(message: str):
     intent = detect_query_intent(message)
     retrieval_k = get_retrieval_k(intent)
     preferred_category = INTENT_TO_CATEGORY.get(intent)
+    retriever = RETRIEVERS.get(retrieval_mode)
 
-    matches = retrieve_top_matches(
-        topic=topic,
-        message=message,
-        k=retrieval_k,
-        preferred_category=preferred_category,
-    )
+    if retriever is None:
+        return {
+            "error": f"Unsupported retrieval mode '{retrieval_mode}'.",
+            "suggestion": "Use 'keyword', 'semantic', or 'chroma'."
+        }
+
+    retriever_kwargs = {
+        "topic": topic,
+        "message": message,
+        "k": retrieval_k,
+        "preferred_category": preferred_category,
+    }
+
+    if retrieval_mode == "chroma":
+        retriever_kwargs["embedding_provider"] = embedding_provider
+
+    matches = retriever(**retriever_kwargs)
 
     if not matches:
         return {
@@ -80,14 +125,9 @@ def handle_chat(message: str):
     return {
         "topic": topic,
         "intent": intent,
+        "retrieval_mode": retrieval_mode,
+        "embedding_provider": embedding_provider if retrieval_mode == "chroma" else None,
         "top_k": len(matches),
-        "sources": [
-            {
-                "path": match["path"],
-                "category": match["category"],
-                "score": match["score"],
-            }
-            for match in matches
-        ],
+        "sources": build_sources(matches),
         "content": combine_matches(matches)
     }

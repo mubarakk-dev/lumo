@@ -54,6 +54,7 @@ class RetrievalTests(unittest.TestCase):
 
         self.assertEqual(response["topic"], "docker")
         self.assertEqual(response["intent"], "troubleshooting")
+        self.assertEqual(response["retrieval_mode"], "keyword")
         self.assertGreaterEqual(response["top_k"], 1)
         self.assertIn("Docker Daemon Not Running", response["content"])
         self.assertTrue(

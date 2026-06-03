@@ -1,5 +1,8 @@
 import unittest
 import warnings
+from unittest.mock import patch
+
+import requests
 
 warnings.filterwarnings(
     "ignore",
@@ -106,6 +109,39 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("Unsupported response mode", data["error"])
+
+    def test_chat_endpoint_rejects_unknown_generation_provider(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Docker daemon is not running",
+                "generation_provider": "unknown",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Unsupported generation provider", data["error"])
+
+    def test_chat_endpoint_falls_back_when_ollama_is_unavailable(self):
+        with patch(
+            "app.services.generation_service.requests.post",
+            side_effect=requests.ConnectionError("connection refused"),
+        ):
+            response = self.client.post(
+                "/chat",
+                json={
+                    "message": "Docker daemon is not running",
+                    "generation_provider": "ollama",
+                },
+            )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["generation_provider"], "ollama")
+        self.assertEqual(data["answer_provider"], "extractive")
+        self.assertTrue(data["used_fallback"])
+        self.assertIn("Ollama is not reachable", data["generation_error"])
 
 
 if __name__ == "__main__":

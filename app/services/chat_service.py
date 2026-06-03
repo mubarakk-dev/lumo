@@ -1,5 +1,8 @@
-from app.services.answer_service import build_grounded_answer
 from app.services.chroma_retrieval_service import retrieve_chroma_matches
+from app.services.generation_service import (
+    SUPPORTED_GENERATION_PROVIDERS,
+    generate_grounded_answer,
+)
 from app.services.knowledge_service import retrieve_top_matches
 from app.services.query_service import detect_query_intent, get_retrieval_k
 from app.services.semantic_retrieval_service import retrieve_semantic_matches
@@ -86,6 +89,7 @@ def handle_chat(
     retrieval_mode: str = "keyword",
     embedding_provider: str = "local_hashing",
     response_mode: str = "answer",
+    generation_provider: str = "extractive",
 ):
     topic = detect_topic(message)
 
@@ -112,6 +116,12 @@ def handle_chat(
             "suggestion": "Use 'answer' or 'retrieval'."
         }
 
+    if generation_provider not in SUPPORTED_GENERATION_PROVIDERS:
+        return {
+            "error": f"Unsupported generation provider '{generation_provider}'.",
+            "suggestion": "Use 'extractive' or 'ollama'."
+        }
+
     retriever_kwargs = {
         "topic": topic,
         "message": message,
@@ -132,24 +142,38 @@ def handle_chat(
 
     sources = build_sources(matches)
     retrieved_content = combine_matches(matches)
-    answer = build_grounded_answer(
+    generation_result = generate_grounded_answer(
         message=message,
         matches=matches,
         sources=sources,
         intent=intent,
+        generation_provider=generation_provider,
     )
 
+    if "error" in generation_result:
+        return generation_result
+
+    answer = generation_result["answer"]
     content = answer if response_mode == "answer" else retrieved_content
 
-    return {
+    response = {
         "topic": topic,
         "intent": intent,
         "retrieval_mode": retrieval_mode,
         "embedding_provider": embedding_provider if retrieval_mode == "chroma" else None,
         "response_mode": response_mode,
+        "generation_provider": generation_result["generation_provider"],
+        "answer_provider": generation_result["answer_provider"],
+        "used_fallback": generation_result["used_fallback"],
         "top_k": len(matches),
         "sources": sources,
         "answer": answer,
         "retrieved_content": retrieved_content,
         "content": content
     }
+
+    for key in ("generation_error", "model"):
+        if key in generation_result:
+            response[key] = generation_result[key]
+
+    return response

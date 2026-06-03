@@ -38,6 +38,20 @@ class ApiTests(unittest.TestCase):
         self.assertIn("Docker Daemon Not Running", data["retrieved_content"])
         self.assertTrue(data["sources"])
 
+    def test_chat_endpoint_expands_chroma_chunks_for_answers(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is Docker?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("package applications", data["answer"])
+        self.assertIn("containers", data["answer"])
+
     def test_chat_endpoint_supports_retrieval_response_mode(self):
         response = self.client.post(
             "/chat",

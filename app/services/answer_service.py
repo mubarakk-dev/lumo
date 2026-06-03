@@ -48,7 +48,7 @@ def build_grounded_answer(
     for match in matches[:3]:
         label = source_label(source_indexes.get(match["path"], 0))
         cleaned_content = strip_markdown_headings(match["content"])
-        lines = compact_lines(cleaned_content)
+        lines = compact_lines(cleaned_content, max_lines=get_max_lines_for_intent(intent))
 
         if not lines:
             continue
@@ -72,6 +72,16 @@ def build_intro(intent: str) -> str:
         return "Here are the most relevant Docker commands from the retrieved knowledge:"
 
     return "Here is a grounded answer based on the retrieved Docker knowledge:"
+
+
+def get_max_lines_for_intent(intent: str) -> int:
+    if intent in {"generation", "cheatsheet"}:
+        return 36
+
+    if intent == "troubleshooting":
+        return 16
+
+    return 16
 
 
 def build_source_summary(sources: list[dict]) -> str:

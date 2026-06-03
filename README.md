@@ -150,6 +150,22 @@ python scripts/evaluate_retrieval.py --compare
 
 The evaluation cases live in `eval/retrieval_cases.json`. Each case defines a query, expected intent, preferred category, and expected source file. This gives the project a measurable baseline before and after adding embeddings, vector search, and hybrid retrieval.
 
+## RAG Answer Evaluation
+
+Run the answer-quality evaluation:
+
+```bash
+python scripts/evaluate_rag.py
+```
+
+Run one case by id:
+
+```bash
+python scripts/evaluate_rag.py --case-id daemon_troubleshooting_answer
+```
+
+The RAG evaluation cases live in `eval/rag_cases.json`. Each case checks the full answer path: expected source retrieval, required answer terms, source citations, and whether the answer avoids unsupported fallback language when the knowledge base contains enough context.
+
 ## Semantic Retrieval
 
 Build the local vector index:
@@ -196,6 +212,8 @@ Example request:
 
 The extractive answer generator only uses retrieved knowledge chunks, which keeps the behavior testable and available without external credentials.
 
+When vector search returns a small section chunk, the chat service expands that match from the original source document before answer generation. This keeps generation grounded in the retrieved source while giving the prompt or extractive answer builder enough context to produce useful answers.
+
 ## Local LLM Answer Generation
 
 The API supports a configurable generation provider:
@@ -240,10 +258,11 @@ Completed:
 - Grounded answer response mode
 - Prompt builder for source-grounded RAG answers
 - Optional local Ollama answer-generation provider
+- Deterministic RAG answer evaluation script
 
 In progress:
 
-- End-to-end RAG quality evaluation
+- Local LLM answer-quality tuning
 
 Planned:
 

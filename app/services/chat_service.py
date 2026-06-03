@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from app.services.chroma_retrieval_service import retrieve_chroma_matches
 from app.services.generation_service import (
     SUPPORTED_GENERATION_PROVIDERS,
@@ -49,7 +51,6 @@ RETRIEVERS = {
     "semantic": retrieve_semantic_matches,
 }
 
-
 def detect_topic(message: str) -> str | None:
     message_lower = message.lower()
 
@@ -62,6 +63,27 @@ def detect_topic(message: str) -> str | None:
 
 def combine_matches(matches: list[dict]) -> str:
     return "\n\n".join(match["content"] for match in matches).strip()
+
+
+def expand_matches_from_sources(matches: list[dict]) -> list[dict]:
+    expanded_matches = []
+
+    for match in matches:
+        source_path = Path(match["path"])
+
+        if not source_path.exists():
+            expanded_matches.append(match)
+            continue
+
+        expanded_matches.append(
+            {
+                **match,
+                "content": source_path.read_text(encoding="utf-8"),
+                "expanded_from_source": True,
+            }
+        )
+
+    return expanded_matches
 
 
 def build_sources(matches: list[dict]) -> list[dict]:
@@ -132,7 +154,7 @@ def handle_chat(
     if retrieval_mode == "chroma":
         retriever_kwargs["embedding_provider"] = embedding_provider
 
-    matches = retriever(**retriever_kwargs)
+    matches = expand_matches_from_sources(retriever(**retriever_kwargs))
 
     if not matches:
         return {

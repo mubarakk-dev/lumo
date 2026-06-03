@@ -154,6 +154,26 @@ The vector index stores metadata such as schema version, topic, embedding provid
 
 ChromaDB stores its generated database under `.chroma/`, which is also ignored by Git. The app supports `retrieval_mode="chroma"` and lets the caller choose `embedding_provider="local_hashing"` or `embedding_provider="sentence_transformers"`.
 
+## Grounded Answer Generation
+
+The chat API supports two response modes:
+
+- `answer`: returns a grounded answer assembled from retrieved context and sources.
+- `retrieval`: returns the raw retrieved Markdown context for debugging.
+
+Example request:
+
+```json
+{
+  "message": "Docker daemon is not running",
+  "retrieval_mode": "chroma",
+  "embedding_provider": "sentence_transformers",
+  "response_mode": "answer"
+}
+```
+
+The current answer generator is extractive and source-grounded. It only uses retrieved knowledge chunks, which keeps the behavior testable before adding an external LLM provider.
+
 ## Current Status
 
 Completed:
@@ -170,12 +190,12 @@ Completed:
 - Retrieval evaluation script
 - Local semantic retrieval mode
 - Local vector index build script
+- Grounded answer response mode
 
 In progress:
 
-- Model-backed embeddings
-- Vector database integration
-- Hybrid retrieval
+- LLM-backed answer generation
+- Prompt design and citation formatting
 
 Planned:
 

@@ -1,3 +1,4 @@
+from app.services.answer_service import build_grounded_answer
 from app.services.chroma_retrieval_service import retrieve_chroma_matches
 from app.services.knowledge_service import retrieve_top_matches
 from app.services.query_service import detect_query_intent, get_retrieval_k
@@ -84,6 +85,7 @@ def handle_chat(
     message: str,
     retrieval_mode: str = "keyword",
     embedding_provider: str = "local_hashing",
+    response_mode: str = "answer",
 ):
     topic = detect_topic(message)
 
@@ -104,6 +106,12 @@ def handle_chat(
             "suggestion": "Use 'keyword', 'semantic', or 'chroma'."
         }
 
+    if response_mode not in {"answer", "retrieval"}:
+        return {
+            "error": f"Unsupported response mode '{response_mode}'.",
+            "suggestion": "Use 'answer' or 'retrieval'."
+        }
+
     retriever_kwargs = {
         "topic": topic,
         "message": message,
@@ -122,12 +130,26 @@ def handle_chat(
             "suggestion": f"Add more markdown files under knowledge/{topic}/"
         }
 
+    sources = build_sources(matches)
+    retrieved_content = combine_matches(matches)
+    answer = build_grounded_answer(
+        message=message,
+        matches=matches,
+        sources=sources,
+        intent=intent,
+    )
+
+    content = answer if response_mode == "answer" else retrieved_content
+
     return {
         "topic": topic,
         "intent": intent,
         "retrieval_mode": retrieval_mode,
         "embedding_provider": embedding_provider if retrieval_mode == "chroma" else None,
+        "response_mode": response_mode,
         "top_k": len(matches),
-        "sources": build_sources(matches),
-        "content": combine_matches(matches)
+        "sources": sources,
+        "answer": answer,
+        "retrieved_content": retrieved_content,
+        "content": content
     }

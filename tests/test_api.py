@@ -30,8 +30,25 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["topic"], "docker")
         self.assertEqual(data["intent"], "troubleshooting")
-        self.assertIn("Docker Daemon Not Running", data["content"])
+        self.assertEqual(data["response_mode"], "answer")
+        self.assertIn("grounded troubleshooting answer", data["answer"])
+        self.assertIn("Docker Daemon Not Running", data["retrieved_content"])
         self.assertTrue(data["sources"])
+
+    def test_chat_endpoint_supports_retrieval_response_mode(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Docker daemon is not running",
+                "response_mode": "retrieval",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["response_mode"], "retrieval")
+        self.assertEqual(data["content"], data["retrieved_content"])
+        self.assertIn("Docker Daemon Not Running", data["content"])
 
     def test_chat_endpoint_supports_semantic_retrieval(self):
         response = self.client.post(
@@ -76,6 +93,19 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("Unsupported retrieval mode", data["error"])
+
+    def test_chat_endpoint_rejects_unknown_response_mode(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Docker daemon is not running",
+                "response_mode": "unknown",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Unsupported response mode", data["error"])
 
 
 if __name__ == "__main__":

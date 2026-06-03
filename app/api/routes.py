@@ -23,4 +23,5 @@ def chat(request: ChatRequest):
         message=request.message,
         retrieval_mode=request.retrieval_mode,
         embedding_provider=request.embedding_provider,
+        response_mode=request.response_mode,
     )

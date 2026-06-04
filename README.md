@@ -1,12 +1,3 @@
----
-title: Lumo
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # Lumo
 
 Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured RAG system.

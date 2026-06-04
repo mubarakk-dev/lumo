@@ -44,8 +44,13 @@ def build_grounded_answer(
         source["path"]: index
         for index, source in enumerate(sources)
     }
+    seen_paths = set()
 
     for match in matches[:3]:
+        if match["path"] in seen_paths:
+            continue
+
+        seen_paths.add(match["path"])
         label = source_label(source_indexes.get(match["path"], 0))
         cleaned_content = strip_markdown_headings(match["content"])
         lines = compact_lines(cleaned_content, max_lines=get_max_lines_for_intent(intent))

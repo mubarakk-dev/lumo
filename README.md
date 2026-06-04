@@ -102,14 +102,14 @@ The default Ollama settings are:
 
 ```bash
 OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL=llama3.2
+OLLAMA_MODEL=qwen2.5:0.5b
 OLLAMA_TIMEOUT_SECONDS=20
 ```
 
 To use local LLM generation, install Ollama and pull the configured model:
 
 ```bash
-ollama pull llama3.2
+ollama pull qwen2.5:0.5b
 ```
 
 Start the API:
@@ -222,6 +222,8 @@ The API supports a configurable generation provider:
 - `generation_provider="ollama"` sends the retrieved context through a guarded RAG prompt and asks the configured local Ollama model to answer with source citations.
 
 If Ollama is not running or the configured model is unavailable, the app falls back to the extractive answer path. This keeps the app usable in local development, CI, and demos while still supporting free local LLM generation.
+
+The default local model is `qwen2.5:0.5b` because it is small enough for reliable laptop demos while still showing the full RAG flow.
 
 Example request:
 

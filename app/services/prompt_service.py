@@ -1,4 +1,4 @@
-MAX_CONTEXT_CHARS = 6000
+MAX_CONTEXT_CHARS = 1200
 
 
 def build_rag_prompt(
@@ -24,7 +24,9 @@ def build_system_instructions(intent: str) -> str:
             "Answer only from the retrieved context below.",
             "If the context is not enough, say what is missing instead of guessing.",
             "Use concise, beginner-friendly language.",
-            "Cite supporting facts with source numbers like [1] or [2].",
+            "Keep the answer under 100 words.",
+            "Every answer must include at least one citation like [1].",
+            "Do not mention sources that are not listed below.",
             f"Detected user intent: {intent}.",
         ]
     )

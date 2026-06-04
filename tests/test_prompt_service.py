@@ -29,6 +29,7 @@ class PromptServiceTests(unittest.TestCase):
         )
 
         self.assertIn("Answer only from the retrieved context", prompt)
+        self.assertIn("Every answer must include at least one citation", prompt)
         self.assertIn("[1] knowledge/docker/troubleshoot/docker_daemon.md", prompt)
         self.assertIn("Open Docker Desktop", prompt)
         self.assertIn("Docker daemon is not running", prompt)

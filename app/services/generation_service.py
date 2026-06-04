@@ -3,6 +3,8 @@ import requests
 from app.core.config import (
     get_ollama_host,
     get_ollama_model,
+    get_ollama_num_ctx,
+    get_ollama_num_predict,
     get_ollama_timeout_seconds,
 )
 from app.services.answer_service import build_grounded_answer
@@ -38,6 +40,7 @@ def build_extractive_result(
     intent: str,
     requested_provider: str = "extractive",
     fallback_reason: str | None = None,
+    model: str | None = None,
 ) -> dict:
     result = {
         "answer": build_grounded_answer(
@@ -53,6 +56,9 @@ def build_extractive_result(
 
     if fallback_reason:
         result["generation_error"] = fallback_reason
+
+    if model:
+        result["model"] = model
 
     return result
 
@@ -79,8 +85,11 @@ def build_ollama_result(
         ],
         "stream": False,
         "options": {
-            "temperature": 0.2,
+            "temperature": 0.1,
+            "num_ctx": get_ollama_num_ctx(),
+            "num_predict": get_ollama_num_predict(),
         },
+        "keep_alive": "5m",
     }
 
     try:
@@ -92,6 +101,21 @@ def build_ollama_result(
         response.raise_for_status()
         data = response.json()
         answer = data.get("message", {}).get("content", "").strip()
+    except requests.HTTPError as exc:
+        error_detail = str(exc)
+
+        if exc.response is not None and exc.response.text:
+            error_detail = f"{error_detail}: {exc.response.text}"
+
+        return build_extractive_result(
+            message=message,
+            matches=matches,
+            sources=sources,
+            intent=intent,
+            requested_provider="ollama",
+            fallback_reason=f"Ollama is not reachable: {error_detail}",
+            model=model,
+        )
     except requests.RequestException as exc:
         return build_extractive_result(
             message=message,
@@ -100,6 +124,7 @@ def build_ollama_result(
             intent=intent,
             requested_provider="ollama",
             fallback_reason=f"Ollama is not reachable: {exc}",
+            model=model,
         )
     except ValueError as exc:
         return build_extractive_result(
@@ -109,6 +134,7 @@ def build_ollama_result(
             intent=intent,
             requested_provider="ollama",
             fallback_reason=f"Ollama returned invalid JSON: {exc}",
+            model=model,
         )
 
     if not answer:
@@ -119,6 +145,7 @@ def build_ollama_result(
             intent=intent,
             requested_provider="ollama",
             fallback_reason="Ollama returned an empty answer.",
+            model=model,
         )
 
     return {

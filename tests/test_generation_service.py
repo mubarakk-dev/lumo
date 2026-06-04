@@ -48,7 +48,11 @@ class GenerationServiceTests(unittest.TestCase):
         called_payload = mock_post.call_args.kwargs["json"]
         self.assertTrue(called_url.endswith("/api/chat"))
         self.assertFalse(called_payload["stream"])
-        self.assertEqual(called_payload["model"], "llama3.2")
+        self.assertEqual(called_payload["model"], "qwen2.5:0.5b")
+        self.assertEqual(called_payload["options"]["temperature"], 0.1)
+        self.assertEqual(called_payload["options"]["num_ctx"], 1024)
+        self.assertEqual(called_payload["options"]["num_predict"], 120)
+        self.assertEqual(called_payload["keep_alive"], "5m")
 
     def test_ollama_provider_falls_back_when_server_is_unavailable(self):
         matches = [

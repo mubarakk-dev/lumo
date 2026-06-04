@@ -51,6 +51,7 @@ RETRIEVERS = {
     "semantic": retrieve_semantic_matches,
 }
 
+
 def detect_topic(message: str) -> str | None:
     message_lower = message.lower()
 
@@ -67,8 +68,13 @@ def combine_matches(matches: list[dict]) -> str:
 
 def expand_matches_from_sources(matches: list[dict]) -> list[dict]:
     expanded_matches = []
+    seen_paths = set()
 
     for match in matches:
+        if match["path"] in seen_paths:
+            continue
+
+        seen_paths.add(match["path"])
         source_path = Path(match["path"])
 
         if not source_path.exists():

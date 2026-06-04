@@ -2,8 +2,8 @@
 title: Lumo
 colorFrom: blue
 colorTo: green
-sdk: streamlit
-app_file: frontend/streamlit_app.py
+sdk: docker
+app_port: 7860
 pinned: false
 ---
 
@@ -171,10 +171,16 @@ generation_provider = extractive
 To deploy on Hugging Face Spaces:
 
 1. Create a new Space.
-2. Choose `Streamlit` as the SDK.
+2. Choose `Docker` as the SDK.
 3. Connect this repository or push the repository files to the Space.
-4. Keep `app_file: frontend/streamlit_app.py` in the README metadata.
-5. Wait for Hugging Face Spaces to install `requirements.txt` and start the app.
+4. Keep `sdk: docker` and `app_port: 7860` in the README metadata.
+5. Wait for Hugging Face Spaces to build the Dockerfile and start the app.
+
+The Docker container runs:
+
+```bash
+streamlit run frontend/streamlit_app.py --server.port=7860 --server.address=0.0.0.0
+```
 
 The deployed app uses extractive grounded answers by default. Local Ollama generation remains available for local demos through Advanced settings, but Ollama must be running on the machine serving the app.
 

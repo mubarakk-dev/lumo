@@ -1,12 +1,12 @@
 # Lumo
 
-Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured knowledge retrieval system.
+Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured RAG system.
 
 ## Project Overview
 
-Lumo began as a simple chatbot and evolved into a retrieval-based assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from Markdown files and ranks them based on the user's query.
+Lumo began as a simple chatbot and evolved into a retrieval-based assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from Markdown files, ranks them against the user's query, and can generate grounded answers from the retrieved context.
 
-The project explores the foundations of retrieval systems, knowledge architecture, and Retrieval-Augmented Generation (RAG).
+The project explores the foundations of retrieval systems, semantic search, vector databases, prompt design, and Retrieval-Augmented Generation (RAG).
 
 ## Features
 
@@ -55,18 +55,19 @@ User Query
   -> Knowledge Retrieval
   -> Relevance Ranking
   -> Top-K Filtering
-  -> Response Assembly
+  -> Prompt Assembly
+  -> Answer Generation
 ```
 
 ## Knowledge Base Structure
 
 ```text
 knowledge/
-└── docker/
-    ├── learn/
-    ├── generate/
-    ├── troubleshoot/
-    └── cheatsheets/
+`-- docker/
+    |-- learn/
+    |-- generate/
+    |-- troubleshoot/
+    `-- cheatsheets/
 ```
 
 Each Docker concept is stored as a separate Markdown file to improve maintainability, retrieval quality, and scalability.
@@ -77,7 +78,9 @@ Each Docker concept is stored as a separate Markdown file to improve maintainabi
 - Frontend: Streamlit
 - Language: Python
 - Knowledge storage: Markdown
-- Retrieval: custom keyword-based retrieval engine with intent-aware scoring
+- Retrieval: keyword search, local semantic search, and ChromaDB vector search
+- Embeddings: deterministic local embeddings or SentenceTransformers
+- Answer generation: extractive grounded answers with optional local Ollama generation
 
 ## Running The App
 
@@ -87,6 +90,26 @@ Create and activate a virtual environment:
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt
+```
+
+Optional local LLM configuration:
+
+```bash
+cp .env.example .env
+```
+
+The default Ollama settings are:
+
+```bash
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:0.5b
+OLLAMA_TIMEOUT_SECONDS=20
+```
+
+To use local LLM generation, install Ollama and pull the configured model:
+
+```bash
+ollama pull qwen2.5:0.5b
 ```
 
 Start the API:
@@ -107,7 +130,7 @@ streamlit run frontend/streamlit_app.py
 python -m unittest discover -s tests
 ```
 
-The current tests pin representative retrieval behavior before the project moves to embeddings and semantic search.
+The tests cover retrieval behavior, semantic search, ChromaDB retrieval, prompt construction, answer generation fallback behavior, and API request handling.
 
 ## Retrieval Evaluation
 
@@ -125,7 +148,23 @@ python scripts/evaluate_retrieval.py --retriever semantic
 python scripts/evaluate_retrieval.py --compare
 ```
 
-The evaluation cases live in `eval/retrieval_cases.json`. Each case defines a query, expected intent, preferred category, and expected source file. This gives the project a measurable baseline before adding embeddings, vector search, and hybrid retrieval.
+The evaluation cases live in `eval/retrieval_cases.json`. Each case defines a query, expected intent, preferred category, and expected source file. This gives the project a measurable baseline before and after adding embeddings, vector search, and hybrid retrieval.
+
+## RAG Answer Evaluation
+
+Run the answer-quality evaluation:
+
+```bash
+python scripts/evaluate_rag.py
+```
+
+Run one case by id:
+
+```bash
+python scripts/evaluate_rag.py --case-id daemon_troubleshooting_answer
+```
+
+The RAG evaluation cases live in `eval/rag_cases.json`. Each case checks the full answer path: expected source retrieval, required answer terms, source citations, and whether the answer avoids unsupported fallback language when the knowledge base contains enough context.
 
 ## Semantic Retrieval
 
@@ -148,11 +187,57 @@ python scripts/evaluate_retrieval.py --retriever chroma --embedding-provider sen
 python scripts/evaluate_retrieval.py --compare --embedding-provider sentence_transformers
 ```
 
-The generated index is stored under `.lumo_index/` and is ignored by Git. The current semantic retrieval layer uses local deterministic embeddings and cosine similarity so the vector-search architecture is easy to inspect and test. This creates the retrieval interface needed to later plug in model-backed embeddings and a production vector store such as ChromaDB or pgvector.
+The generated local index is stored under `.lumo_index/` and is ignored by Git. ChromaDB stores its generated database under `.chroma/`, which is also ignored by Git.
 
-The vector index stores metadata such as schema version, topic, embedding provider, embedding dimensions, and chunk count. This makes the generated index easier to inspect and safer to evolve as retrieval changes.
+The app supports `retrieval_mode="keyword"`, `retrieval_mode="semantic"`, and `retrieval_mode="chroma"`. Chroma retrieval can use `embedding_provider="local_hashing"` or `embedding_provider="sentence_transformers"`.
 
-ChromaDB stores its generated database under `.chroma/`, which is also ignored by Git. The app supports `retrieval_mode="chroma"` and lets the caller choose `embedding_provider="local_hashing"` or `embedding_provider="sentence_transformers"`.
+## Grounded Answer Generation
+
+The chat API supports two response modes:
+
+- `answer`: returns a grounded answer assembled from retrieved context and sources.
+- `retrieval`: returns the raw retrieved Markdown context for debugging.
+
+Example request:
+
+```json
+{
+  "message": "Docker daemon is not running",
+  "retrieval_mode": "chroma",
+  "embedding_provider": "sentence_transformers",
+  "response_mode": "answer",
+  "generation_provider": "extractive"
+}
+```
+
+The extractive answer generator only uses retrieved knowledge chunks, which keeps the behavior testable and available without external credentials.
+
+When vector search returns a small section chunk, the chat service expands that match from the original source document before answer generation. This keeps generation grounded in the retrieved source while giving the prompt or extractive answer builder enough context to produce useful answers.
+
+## Local LLM Answer Generation
+
+The API supports a configurable generation provider:
+
+- `generation_provider="extractive"` uses the local source-grounded answer builder.
+- `generation_provider="ollama"` sends the retrieved context through a guarded RAG prompt and asks the configured local Ollama model to answer with source citations.
+
+If Ollama is not running or the configured model is unavailable, the app falls back to the extractive answer path. This keeps the app usable in local development, CI, and demos while still supporting free local LLM generation.
+
+The default local model is `qwen2.5:0.5b` because it is small enough for reliable laptop demos while still showing the full RAG flow.
+
+Example request:
+
+```json
+{
+  "message": "Docker daemon is not running",
+  "retrieval_mode": "chroma",
+  "embedding_provider": "sentence_transformers",
+  "response_mode": "answer",
+  "generation_provider": "ollama"
+}
+```
+
+This gives the project a practical local-first RAG path: SentenceTransformers creates embeddings, ChromaDB retrieves relevant chunks, the prompt builder packages context with source IDs, and Ollama generates a cited answer from that retrieved context.
 
 ## Current Status
 
@@ -169,19 +254,20 @@ Completed:
 - Retrieval baseline tests
 - Retrieval evaluation script
 - Local semantic retrieval mode
+- ChromaDB retrieval mode
+- SentenceTransformers embedding provider
 - Local vector index build script
+- Grounded answer response mode
+- Prompt builder for source-grounded RAG answers
+- Optional local Ollama answer-generation provider
+- Deterministic RAG answer evaluation script
 
 In progress:
 
-- Model-backed embeddings
-- Vector database integration
-- Hybrid retrieval
+- Local LLM answer-quality tuning
 
 Planned:
 
-- Embedding-based retrieval
-- Production vector search
-- Source-grounded answer generation
 - Conversation memory
 - Additional domains such as Git, FastAPI, Kubernetes, CI/CD, and cloud platforms
 

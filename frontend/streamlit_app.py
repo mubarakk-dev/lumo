@@ -21,12 +21,22 @@ embedding_provider = st.selectbox(
     "Embedding provider",
     options=["local_hashing", "sentence_transformers"],
 )
+response_mode = st.selectbox(
+    "Response mode",
+    options=["answer", "retrieval"],
+)
+generation_provider = st.selectbox(
+    "Generation provider",
+    options=["extractive", "ollama"],
+)
 
 if st.button("Send"):
     payload = {
         "message": user_input,
         "retrieval_mode": retrieval_mode,
         "embedding_provider": embedding_provider,
+        "response_mode": response_mode,
+        "generation_provider": generation_provider,
     }
 
     response = requests.post(API_URL, json=payload, timeout=10)
@@ -46,6 +56,15 @@ if st.button("Send"):
 
         if data.get("embedding_provider"):
             st.caption(f"Embedding provider: {data['embedding_provider']}")
+
+        if "response_mode" in data:
+            st.caption(f"Response mode: {data['response_mode']}")
+
+        if "answer_provider" in data:
+            st.caption(f"Answer provider: {data['answer_provider']}")
+
+        if data.get("used_fallback"):
+            st.warning(data.get("generation_error", "Using extractive fallback."))
 
         if "content" in data:
             st.markdown(data["content"])

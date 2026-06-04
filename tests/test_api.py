@@ -1,5 +1,8 @@
 import unittest
 import warnings
+from unittest.mock import patch
+
+import requests
 
 warnings.filterwarnings(
     "ignore",
@@ -30,8 +33,39 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["topic"], "docker")
         self.assertEqual(data["intent"], "troubleshooting")
-        self.assertIn("Docker Daemon Not Running", data["content"])
+        self.assertEqual(data["response_mode"], "answer")
+        self.assertIn("grounded troubleshooting answer", data["answer"])
+        self.assertIn("Docker Daemon Not Running", data["retrieved_content"])
         self.assertTrue(data["sources"])
+
+    def test_chat_endpoint_expands_chroma_chunks_for_answers(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is Docker?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("package applications", data["answer"])
+        self.assertIn("containers", data["answer"])
+
+    def test_chat_endpoint_supports_retrieval_response_mode(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Docker daemon is not running",
+                "response_mode": "retrieval",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["response_mode"], "retrieval")
+        self.assertEqual(data["content"], data["retrieved_content"])
+        self.assertIn("Docker Daemon Not Running", data["content"])
 
     def test_chat_endpoint_supports_semantic_retrieval(self):
         response = self.client.post(
@@ -76,6 +110,52 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("Unsupported retrieval mode", data["error"])
+
+    def test_chat_endpoint_rejects_unknown_response_mode(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Docker daemon is not running",
+                "response_mode": "unknown",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Unsupported response mode", data["error"])
+
+    def test_chat_endpoint_rejects_unknown_generation_provider(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Docker daemon is not running",
+                "generation_provider": "unknown",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Unsupported generation provider", data["error"])
+
+    def test_chat_endpoint_falls_back_when_ollama_is_unavailable(self):
+        with patch(
+            "app.services.generation_service.requests.post",
+            side_effect=requests.ConnectionError("connection refused"),
+        ):
+            response = self.client.post(
+                "/chat",
+                json={
+                    "message": "Docker daemon is not running",
+                    "generation_provider": "ollama",
+                },
+            )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["generation_provider"], "ollama")
+        self.assertEqual(data["answer_provider"], "extractive")
+        self.assertTrue(data["used_fallback"])
+        self.assertIn("Ollama is not reachable", data["generation_error"])
 
 
 if __name__ == "__main__":

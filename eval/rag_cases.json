@@ -1,0 +1,42 @@
+[
+  {
+    "id": "docker_definition_answer",
+    "query": "What is Docker?",
+    "retrieval_mode": "chroma",
+    "embedding_provider": "local_hashing",
+    "generation_provider": "extractive",
+    "expected_source": "knowledge/docker/learn/what_is_docker.md",
+    "required_terms": ["package applications", "containers"],
+    "required_citations": ["[1]"]
+  },
+  {
+    "id": "daemon_troubleshooting_answer",
+    "query": "Docker daemon is not running",
+    "retrieval_mode": "chroma",
+    "embedding_provider": "local_hashing",
+    "generation_provider": "extractive",
+    "expected_source": "knowledge/docker/troubleshoot/docker_daemon.md",
+    "required_terms": ["Docker Desktop", "service"],
+    "required_citations": ["[1]"]
+  },
+  {
+    "id": "compose_yaml_answer",
+    "query": "Create a Docker Compose YAML file",
+    "retrieval_mode": "chroma",
+    "embedding_provider": "local_hashing",
+    "generation_provider": "extractive",
+    "expected_source": "knowledge/docker/generate/docker_compose.md",
+    "required_terms": ["services", "ports"],
+    "required_citations": ["[1]"]
+  },
+  {
+    "id": "cleanup_commands_answer",
+    "query": "Docker cleanup commands",
+    "retrieval_mode": "chroma",
+    "embedding_provider": "local_hashing",
+    "generation_provider": "extractive",
+    "expected_source": "knowledge/docker/cheatsheets/cleanup.md",
+    "required_terms": ["docker system prune", "docker volume prune"],
+    "required_citations": ["[1]"]
+  }
+]

@@ -3,10 +3,26 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from app.services.generation_service import generate_grounded_answer
+from app.services.generation_service import ensure_answer_citation, generate_grounded_answer
 
 
 class GenerationServiceTests(unittest.TestCase):
+    def test_preserves_existing_model_citation(self):
+        answer = ensure_answer_citation(
+            "Open Docker Desktop. [1]",
+            [{"path": "knowledge/docker/troubleshoot/docker_daemon.md"}],
+        )
+
+        self.assertEqual(answer, "Open Docker Desktop. [1]")
+
+    def test_adds_first_source_citation_when_model_omits_one(self):
+        answer = ensure_answer_citation(
+            "Open Docker Desktop.",
+            [{"path": "knowledge/docker/troubleshoot/docker_daemon.md"}],
+        )
+
+        self.assertEqual(answer, "Open Docker Desktop. [1]")
+
     def test_ollama_provider_returns_model_answer(self):
         matches = [
             {
@@ -51,7 +67,7 @@ class GenerationServiceTests(unittest.TestCase):
         self.assertEqual(called_payload["model"], "qwen2.5:0.5b")
         self.assertEqual(called_payload["options"]["temperature"], 0.1)
         self.assertEqual(called_payload["options"]["num_ctx"], 1024)
-        self.assertEqual(called_payload["options"]["num_predict"], 120)
+        self.assertEqual(called_payload["options"]["num_predict"], 180)
         self.assertEqual(called_payload["keep_alive"], "5m")
 
     def test_ollama_provider_falls_back_when_server_is_unavailable(self):

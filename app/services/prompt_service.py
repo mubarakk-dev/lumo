@@ -24,8 +24,11 @@ def build_system_instructions(intent: str) -> str:
             "Answer only from the retrieved context below.",
             "If the context is not enough, say what is missing instead of guessing.",
             "Use concise, beginner-friendly language.",
-            "Keep the answer under 100 words.",
+            "Answer in 3 to 5 short bullet points or numbered steps.",
+            "Do not repeat the same instruction.",
+            "Keep the answer under 120 words.",
             "Every answer must include at least one citation like [1].",
+            "End the answer after the final citation.",
             "Do not mention sources that are not listed below.",
             f"Detected user intent: {intent}.",
         ]

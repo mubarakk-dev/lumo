@@ -1,3 +1,5 @@
+import re
+
 import requests
 
 from app.core.config import (
@@ -12,6 +14,7 @@ from app.services.prompt_service import build_rag_prompt
 
 
 SUPPORTED_GENERATION_PROVIDERS = {"extractive", "ollama"}
+CITATION_PATTERN = re.compile(r"\[\d+\]")
 
 
 def generate_grounded_answer(
@@ -149,9 +152,16 @@ def build_ollama_result(
         )
 
     return {
-        "answer": answer,
+        "answer": ensure_answer_citation(answer, sources),
         "generation_provider": "ollama",
         "answer_provider": "ollama",
         "used_fallback": False,
         "model": model,
     }
+
+
+def ensure_answer_citation(answer: str, sources: list[dict]) -> str:
+    if CITATION_PATTERN.search(answer) or not sources:
+        return answer
+
+    return f"{answer.rstrip()} [1]"

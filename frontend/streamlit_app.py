@@ -3,6 +3,7 @@ import streamlit as st
 
 
 API_URL = "http://127.0.0.1:8000/chat"
+API_TIMEOUT_SECONDS = 90
 
 st.set_page_config(
     page_title="Lumo",
@@ -39,7 +40,15 @@ if st.button("Send"):
         "generation_provider": generation_provider,
     }
 
-    response = requests.post(API_URL, json=payload, timeout=10)
+    try:
+        with st.spinner("Generating grounded answer..."):
+            response = requests.post(API_URL, json=payload, timeout=API_TIMEOUT_SECONDS)
+    except requests.Timeout:
+        st.error("The backend took too long to respond. Try again, or switch generation provider to extractive.")
+        st.stop()
+    except requests.RequestException as exc:
+        st.error(f"Could not reach the backend: {exc}")
+        st.stop()
 
     if response.status_code == 200:
         data = response.json()

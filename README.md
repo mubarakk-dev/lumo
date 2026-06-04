@@ -11,6 +11,8 @@ pinned: false
 
 Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured RAG system.
 
+Live demo: [Lumo on Hugging Face Spaces](https://huggingface.co/spaces/mubarakk-dev/Lumo)
+
 ## Project Overview
 
 Lumo began as a simple chatbot and evolved into a retrieval-based assistant built around a modular Docker knowledge base. Instead of relying on hardcoded responses, Lumo retrieves relevant knowledge chunks from Markdown files, ranks them against the user's query, and can generate grounded answers from the retrieved context.

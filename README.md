@@ -1,3 +1,12 @@
+---
+title: Lumo
+colorFrom: blue
+colorTo: green
+sdk: streamlit
+app_file: frontend/streamlit_app.py
+pinned: false
+---
+
 # Lumo
 
 Lumo is an AI-powered Docker assistant designed to help users learn Docker concepts, generate commands and configurations, and troubleshoot common Docker issues through a structured RAG system.
@@ -147,6 +156,27 @@ python -m unittest discover -s tests
 ```
 
 The tests cover retrieval behavior, semantic search, ChromaDB retrieval, prompt construction, answer generation fallback behavior, and API request handling.
+
+## Deploying The Public Demo
+
+The public demo is designed to run as a Streamlit app without a separate FastAPI server. It uses deployment-safe defaults:
+
+```text
+retrieval_mode = chroma
+embedding_provider = local_hashing
+response_mode = answer
+generation_provider = extractive
+```
+
+To deploy on Hugging Face Spaces:
+
+1. Create a new Space.
+2. Choose `Streamlit` as the SDK.
+3. Connect this repository or push the repository files to the Space.
+4. Keep `app_file: frontend/streamlit_app.py` in the README metadata.
+5. Wait for Hugging Face Spaces to install `requirements.txt` and start the app.
+
+The deployed app uses extractive grounded answers by default. Local Ollama generation remains available for local demos through Advanced settings, but Ollama must be running on the machine serving the app.
 
 ## Retrieval Evaluation
 

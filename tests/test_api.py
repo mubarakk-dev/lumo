@@ -11,6 +11,7 @@ warnings.filterwarnings(
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.services.chat_service import detect_topic
 
 
 class ApiTests(unittest.TestCase):
@@ -37,6 +38,31 @@ class ApiTests(unittest.TestCase):
         self.assertIn("grounded troubleshooting answer", data["answer"])
         self.assertIn("Docker Daemon Not Running", data["retrieved_content"])
         self.assertTrue(data["sources"])
+
+    def test_detects_docker_topic_from_operational_terms(self):
+        operational_messages = [
+            "how to inspect logs",
+            "show container stats",
+            "exec into a shell",
+            "why is the service restarting",
+            "how do I prune old images",
+        ]
+
+        for message in operational_messages:
+            with self.subTest(message=message):
+                self.assertEqual(detect_topic(message), "docker")
+
+    def test_chat_endpoint_handles_operational_docker_question_without_explicit_docker_word(self):
+        response = self.client.post(
+            "/chat",
+            json={"message": "how to inspect logs"},
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["topic"], "docker")
+        self.assertTrue(data["sources"])
+        self.assertNotIn("error", data)
 
     def test_chat_endpoint_expands_chroma_chunks_for_answers(self):
         response = self.client.post(

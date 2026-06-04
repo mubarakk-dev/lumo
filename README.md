@@ -103,7 +103,9 @@ The default Ollama settings are:
 ```bash
 OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=qwen2.5:0.5b
-OLLAMA_TIMEOUT_SECONDS=20
+OLLAMA_TIMEOUT_SECONDS=60
+OLLAMA_NUM_CTX=1024
+OLLAMA_NUM_PREDICT=180
 ```
 
 To use local LLM generation, install Ollama and pull the configured model:
@@ -112,13 +114,27 @@ To use local LLM generation, install Ollama and pull the configured model:
 ollama pull qwen2.5:0.5b
 ```
 
-Start the API:
+Start the Streamlit frontend:
+
+```bash
+streamlit run frontend/streamlit_app.py
+```
+
+By default, Streamlit calls the chat service directly. This makes the demo easier to run on free Streamlit-style hosting because it does not require a separate FastAPI process.
+
+Optional API mode for local development:
+
+```bash
+set LUMO_CHAT_BACKEND=api
+```
+
+Start the API in one terminal:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Start the Streamlit frontend in another terminal:
+Then start Streamlit in another terminal:
 
 ```bash
 streamlit run frontend/streamlit_app.py

@@ -336,3 +336,9 @@ Give me a FastAPI Dockerfile template.
 Lumo aims to become a practical AI engineering assistant that helps developers learn, build, deploy, and troubleshoot modern engineering tools.
 
 The first phase focuses on Docker. Future phases can expand into Git, FastAPI, Kubernetes, CI/CD, cloud platforms, and AI engineering workflows.
+
+## License
+
+Copyright (c) 2026 Mubarak.
+
+All rights reserved. This project is publicly viewable for portfolio and demonstration purposes only. No permission is granted to copy, modify, distribute, sublicense, or use the source code without explicit written permission.

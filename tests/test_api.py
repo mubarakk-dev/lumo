@@ -35,7 +35,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data["topic"], "docker")
         self.assertEqual(data["intent"], "troubleshooting")
         self.assertEqual(data["response_mode"], "answer")
-        self.assertIn("grounded troubleshooting answer", data["answer"])
+        self.assertIn("[1]", data["answer"])
+        self.assertIn("Docker Desktop", data["answer"])
         self.assertIn("Docker Daemon Not Running", data["retrieved_content"])
         self.assertTrue(data["sources"])
 

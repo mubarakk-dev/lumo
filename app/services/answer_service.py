@@ -1,20 +1,32 @@
 import re
 
 
-HEADING_PATTERN = re.compile(r"^#+\s*", re.MULTILINE)
-
-
-def strip_markdown_headings(text: str) -> str:
-    return HEADING_PATTERN.sub("", text).strip()
+HEADING_PATTERN = re.compile(r"^#+\s*(.+)$")
+RELATED_QUESTIONS_HEADING = "related questions"
 
 
 def compact_lines(text: str, max_lines: int = 10) -> list[str]:
     lines = []
+    skipping_related_questions = False
 
     for raw_line in text.splitlines():
         line = raw_line.strip()
 
-        if not line or line == "---":
+        if line == "---":
+            skipping_related_questions = False
+            continue
+
+        if not line:
+            continue
+
+        heading_match = HEADING_PATTERN.match(line)
+
+        if heading_match:
+            heading = heading_match.group(1).strip().lower()
+            skipping_related_questions = heading == RELATED_QUESTIONS_HEADING
+            continue
+
+        if skipping_related_questions:
             continue
 
         lines.append(line)
@@ -38,8 +50,7 @@ def build_grounded_answer(
     if not matches:
         return "I could not find enough grounded Docker context to answer that."
 
-    intro = build_intro(intent)
-    answer_parts = [intro]
+    answer_parts = []
     source_indexes = {
         source["path"]: index
         for index, source in enumerate(sources)
@@ -52,31 +63,14 @@ def build_grounded_answer(
 
         seen_paths.add(match["path"])
         label = source_label(source_indexes.get(match["path"], 0))
-        cleaned_content = strip_markdown_headings(match["content"])
-        lines = compact_lines(cleaned_content, max_lines=get_max_lines_for_intent(intent))
+        lines = compact_lines(match["content"], max_lines=get_max_lines_for_intent(intent))
 
         if not lines:
             continue
 
-        answer_parts.append(f"{label} " + "\n".join(lines))
-
-    if sources:
-        answer_parts.append(build_source_summary(sources))
+        answer_parts.append(format_answer_block(label, lines))
 
     return "\n\n".join(answer_parts).strip()
-
-
-def build_intro(intent: str) -> str:
-    if intent == "troubleshooting":
-        return "Here is a grounded troubleshooting answer based on the retrieved Docker knowledge:"
-
-    if intent == "generation":
-        return "Here is a grounded Docker solution based on the retrieved knowledge:"
-
-    if intent == "cheatsheet":
-        return "Here are the most relevant Docker commands from the retrieved knowledge:"
-
-    return "Here is a grounded answer based on the retrieved Docker knowledge:"
 
 
 def get_max_lines_for_intent(intent: str) -> int:
@@ -86,13 +80,14 @@ def get_max_lines_for_intent(intent: str) -> int:
     if intent == "troubleshooting":
         return 16
 
-    return 16
+    return 13
 
 
-def build_source_summary(sources: list[dict]) -> str:
-    source_lines = ["Sources:"]
+def format_answer_block(label: str, lines: list[str]) -> str:
+    first_line = lines[0]
+    remaining_lines = lines[1:]
 
-    for index, source in enumerate(sources):
-        source_lines.append(f"{source_label(index)} {source['path']}")
+    if not remaining_lines:
+        return f"{label} {first_line}"
 
-    return "\n".join(source_lines)
+    return f"{label} {first_line}\n" + "\n".join(remaining_lines)

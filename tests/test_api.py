@@ -47,6 +47,15 @@ class ApiTests(unittest.TestCase):
             "exec into a shell",
             "why is the service restarting",
             "how do I prune old images",
+            "what is a yaml file",
+            "what is a .yaml file",
+            "what is a .yml file",
+            "what is a yml file",
+            "give me a template for a yaml file",
+            "give me a template for a .yml file",
+            "no space left on device",
+            "how do I copy a file into a container",
+            "what is a virtual machine",
         ]
 
         for message in operational_messages:
@@ -110,6 +119,175 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data["embedding_provider"], "sentence_transformers")
         self.assertIn("images_vs_containers.md", data["sources"][0]["path"])
         self.assertIn("running instance", data["answer"])
+
+    def test_chroma_retrieval_routes_plain_container_definition(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is a container?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "definition")
+        self.assertIn("images_vs_containers.md", data["sources"][0]["path"])
+        self.assertIn("running instance", data["answer"])
+        self.assertNotIn("List running containers", data["answer"])
+
+    def test_chroma_retrieval_routes_yaml_definition(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is a YAML file?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "definition")
+        self.assertIn("what_is_yaml.md", data["sources"][0]["path"])
+        self.assertIn("human-readable configuration format", data["answer"])
+
+    def test_chroma_retrieval_routes_yaml_extension_definition(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is a .yml file?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "definition")
+        self.assertIn("what_is_yaml.md", data["sources"][0]["path"])
+
+    def test_chroma_retrieval_routes_yaml_template_generation(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Give me a template for a YAML file",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "generation")
+        self.assertIn("docker_compose.md", data["sources"][0]["path"])
+        self.assertIn("services:", data["answer"])
+
+    def test_chroma_retrieval_routes_yaml_extension_template_generation(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Give me a template for a .yaml file",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "generation")
+        self.assertIn("docker_compose.md", data["sources"][0]["path"])
+        self.assertIn("services:", data["answer"])
+
+    def test_chroma_retrieval_routes_no_space_left_to_pruning_fix(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "No space left on device",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "troubleshooting")
+        self.assertIn("no_space_left.md", data["sources"][0]["path"])
+        self.assertIn("**Problem**", data["answer"])
+        self.assertIn("**Cause**", data["answer"])
+        self.assertIn("**Fix**", data["answer"])
+        self.assertIn("docker system prune", data["answer"])
+
+    def test_chroma_retrieval_routes_compose_dockerfile_comparison(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is the difference between Dockerfile and Docker Compose?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "comparison")
+        self.assertIn("docker_compose_vs_dockerfile.md", data["sources"][0]["path"])
+        self.assertIn("Dockerfile builds an image", data["answer"])
+
+    def test_chroma_retrieval_routes_inside_running_container_to_exec(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "How do I see what is happening inside a running container?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "generation")
+        self.assertIn("exec_into_container.md", data["sources"][0]["path"])
+        self.assertIn("docker exec", data["answer"])
+
+    def test_chroma_retrieval_routes_copy_file_to_docker_cp(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "How do I copy a file from my local machine into a running container?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "generation")
+        self.assertIn("copy_files.md", data["sources"][0]["path"])
+        self.assertIn("docker cp", data["answer"])
+        self.assertNotIn("Dockerfile is a text file", data["answer"])
+
+    def test_chroma_retrieval_preserves_dockerfile_template_code_block(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "Can you write a Dockerfile for an app using a multi-stage build",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("dockerfile_template.md", data["sources"][0]["path"])
+        self.assertIn("```dockerfile", data["answer"])
+        self.assertIn("FROM python:3.11-slim", data["answer"])
+
+    def test_chroma_retrieval_routes_virtual_machine_definition(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is a virtual machine?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "definition")
+        self.assertIn("virtual_machines.md", data["sources"][0]["path"])
+        self.assertIn("software-based computer", data["answer"])
 
     def test_chat_endpoint_supports_retrieval_response_mode(self):
         response = self.client.post(

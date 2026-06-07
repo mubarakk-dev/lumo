@@ -3,6 +3,9 @@
 ## Problem
 Docker commands fail because Docker Desktop or the Docker service is not running.
 
+## Cause
+Docker Desktop is closed, still starting, or the Docker service has stopped.
+
 ## Common Error
 
 ```text

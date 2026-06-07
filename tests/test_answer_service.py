@@ -28,11 +28,12 @@ class AnswerServiceTests(unittest.TestCase):
             intent="troubleshooting",
         )
 
-        self.assertTrue(answer.startswith("[1] Docker service is not running"))
+        self.assertTrue(answer.startswith("[1] **Problem**"))
         self.assertIn("Docker service is not running", answer)
+        self.assertIn("**Cause**", answer)
+        self.assertIn("**Fix**", answer)
         self.assertIn("Open Docker Desktop", answer)
         self.assertNotIn("Docker Daemon Not Running", answer)
-        self.assertNotIn("Problem", answer)
         self.assertNotIn("Sources:", answer)
 
     def test_removes_related_questions_from_answer(self):
@@ -110,6 +111,42 @@ class AnswerServiceTests(unittest.TestCase):
         )
 
         self.assertEqual(answer.count("Docker service is not running"), 1)
+
+    def test_troubleshooting_answer_uses_problem_cause_fix_shape(self):
+        matches = [
+            {
+                "content": (
+                    "# No Space Left On Device\n\n"
+                    "## Problem\nDocker has no disk space left.\n\n"
+                    "## Cause\nUnused images and volumes accumulated.\n\n"
+                    "## Fix\nRun `docker system prune`."
+                ),
+                "path": "knowledge/docker/troubleshoot/no_space_left.md",
+                "category": "troubleshoot",
+                "score": 1.0,
+            }
+        ]
+        sources = [
+            {
+                "path": "knowledge/docker/troubleshoot/no_space_left.md",
+                "category": "troubleshoot",
+                "score": 1.0,
+            }
+        ]
+
+        answer = build_grounded_answer(
+            message="No space left on device",
+            matches=matches,
+            sources=sources,
+            intent="troubleshooting",
+        )
+
+        self.assertIn("[1] **Problem**", answer)
+        self.assertIn("Docker has no disk space left.", answer)
+        self.assertIn("**Cause**", answer)
+        self.assertIn("Unused images and volumes accumulated.", answer)
+        self.assertIn("**Fix**", answer)
+        self.assertIn("docker system prune", answer)
 
 
 if __name__ == "__main__":

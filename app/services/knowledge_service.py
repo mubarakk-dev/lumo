@@ -62,11 +62,21 @@ def score_file(message: str, file_data: dict) -> int:
         if "compose vs dockerfile" in filename:
             score -= 100
 
+    if "yaml" in message_lower or "yml" in message_lower or ".yaml" in message_lower or ".yml" in message_lower:
+        if "what is yaml" in filename:
+            score += 180
+        if category == "generate" and ("template" in message_lower or "example" in message_lower):
+            if "docker compose" in filename:
+                score += 180
+
     if (
         "what is a docker image" in message_lower
         or "what is docker image" in message_lower
+        or "what is an image" in message_lower
+        or "what is image" in message_lower
         or "what are docker images" in message_lower
         or "explain docker image" in message_lower
+        or "explain image" in message_lower
     ):
         if "images vs containers" in filename:
             score += 220
@@ -76,13 +86,28 @@ def score_file(message: str, file_data: dict) -> int:
     if (
         "what is a docker container" in message_lower
         or "what is docker container" in message_lower
+        or "what is a container" in message_lower
+        or "what is container" in message_lower
         or "what are docker containers" in message_lower
+        or "what are containers" in message_lower
         or "explain docker container" in message_lower
+        or "explain container" in message_lower
     ):
         if "images vs containers" in filename:
             score += 220
         if "what is docker" in filename:
             score -= 80
+
+    if (
+        "difference between" in message_lower
+        or "compare" in message_lower
+        or " vs " in message_lower
+        or " versus " in message_lower
+    ) and "dockerfile" in message_lower and "compose" in message_lower:
+        if "docker compose vs dockerfile" in filename:
+            score += 260
+        if "what is docker compose" in filename or "what is dockerfile" in filename:
+            score -= 100
 
     if "daemon not running" in message_lower and "daemon" in filename:
         score += 120
@@ -150,6 +175,21 @@ def score_file(message: str, file_data: dict) -> int:
             score += 120
 
     if (
+        "no space" in message_lower
+        or "space left" in message_lower
+        or "no space left on device" in message_lower
+        or "disk full" in message_lower
+        or "disk space" in message_lower
+        or "device full" in message_lower
+        or "storage full" in message_lower
+        or "out of space" in message_lower
+    ):
+        if "no space left" in filename:
+            score += 240
+        if "cleanup" in filename:
+            score += 120
+
+    if (
         "docker hub" in message_lower
         or "push image" in message_lower
         or "push an image" in message_lower
@@ -158,9 +198,29 @@ def score_file(message: str, file_data: dict) -> int:
         if "registry" in filename:
             score += 120
 
-    if "exec" in message_lower or "enter" in message_lower or "inside container" in message_lower:
+    if (
+        "exec" in message_lower
+        or "enter" in message_lower
+        or "inside container" in message_lower
+        or "inside a running container" in message_lower
+        or "inside running container" in message_lower
+        or "happening inside" in message_lower
+        or "see what is happening" in message_lower
+        or "inspect inside" in message_lower
+        or "debug inside" in message_lower
+    ):
         if "exec" in filename:
             score += 120
+
+    if "copy a file" in message_lower or "copy file" in message_lower or "copy files" in message_lower or "docker cp" in message_lower:
+        if "copy files" in filename:
+            score += 240
+        if "dockerfile" in filename:
+            score -= 120
+
+    if "virtual machine" in message_lower or "virtual machines" in message_lower or " vm" in message_lower or " vms" in message_lower:
+        if "virtual machines" in filename:
+            score += 220
 
     if "permission denied" in message_lower:
         if "permission" in filename:
@@ -203,6 +263,8 @@ def score_file(message: str, file_data: dict) -> int:
     if "multi stage" in message_lower or "multi-stage" in message_lower:
         if "multi stage" in filename:
             score += 120
+        if category == "generate" and "dockerfile template" in filename:
+            score += 180
 
     if "build failing" in message_lower or "build fails" in message_lower or "build keeps failing" in message_lower:
         if "build failures" in filename:

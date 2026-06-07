@@ -5,7 +5,12 @@ import chromadb
 from app.services.chunking_service import load_knowledge_chunks
 from app.services.embedding_service import DEFAULT_EMBEDDING_PROVIDER, embed_texts
 from app.services.knowledge_service import score_file
-from app.services.query_service import detect_definition_target
+from app.services.query_service import (
+    detect_comparison_target,
+    detect_definition_target,
+    detect_generation_target,
+    detect_troubleshooting_target,
+)
 
 
 CHROMA_DIR = Path(".chroma")
@@ -19,6 +24,16 @@ def get_client():
 def collection_name(topic: str, embedding_provider: str) -> str:
     safe_provider = embedding_provider.replace("-", "_")
     return f"{DEFAULT_COLLECTION}_{topic}_{safe_provider}"
+
+
+def target_matches_record(target: str | None, filename: str, path: str) -> bool:
+    if not target:
+        return False
+
+    normalized_target = target.replace("_", " ")
+    normalized_path = Path(path).stem.replace("_", " ").lower()
+
+    return normalized_target in filename or normalized_target in normalized_path
 
 
 def get_collection(topic: str, embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER):
@@ -77,14 +92,18 @@ def retrieve_chroma_matches(
     embedding_provider: str = DEFAULT_EMBEDDING_PROVIDER,
 ) -> list[dict]:
     collection = get_collection(topic, embedding_provider)
+    expected_chunk_count = len(load_knowledge_chunks(topic))
 
-    if collection.count() == 0:
+    if collection.count() != expected_chunk_count:
         build_chroma_index(topic, embedding_provider)
 
     query_embedding = embed_texts([message], provider=embedding_provider)[0]
     where = {"category": preferred_category} if preferred_category else None
     candidate_count = min(collection.count(), max(k * 5, 20))
     definition_target = detect_definition_target(message)
+    comparison_target = detect_comparison_target(message)
+    generation_target = detect_generation_target(message)
+    troubleshooting_target = detect_troubleshooting_target(message)
     result = collection.query(
         query_embeddings=[query_embedding],
         n_results=candidate_count,
@@ -109,7 +128,15 @@ def retrieve_chroma_matches(
                 "content": document,
             },
         )
-        target_boost = 0.5 if definition_target and definition_target in metadata["filename"] else 0
+        target_boost = 0
+        if target_matches_record(definition_target, metadata["filename"], metadata["path"]):
+            target_boost += 0.5
+        if target_matches_record(comparison_target, metadata["filename"], metadata["path"]):
+            target_boost += 0.5
+        if target_matches_record(generation_target, metadata["filename"], metadata["path"]):
+            target_boost += 0.5
+        if target_matches_record(troubleshooting_target, metadata["filename"], metadata["path"]):
+            target_boost += 0.5
         combined_score = semantic_score + min(keyword_score / 200, 1) * 0.25 + target_boost
         matches.append(
             {

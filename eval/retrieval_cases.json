@@ -35,6 +35,55 @@
     "expected_source": "knowledge/docker/learn/images_vs_containers.md"
   },
   {
+    "id": "plain_container_definition",
+    "query": "What is a container?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/images_vs_containers.md"
+  },
+  {
+    "id": "yaml_definition",
+    "query": "What is a YAML file?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/what_is_yaml.md"
+  },
+  {
+    "id": "yaml_template",
+    "query": "Give me a template for a YAML file",
+    "expected_intent": "generation",
+    "preferred_category": "generate",
+    "expected_source": "knowledge/docker/generate/docker_compose.md"
+  },
+  {
+    "id": "yaml_extension_definition",
+    "query": "What is a .yml file?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/what_is_yaml.md"
+  },
+  {
+    "id": "yaml_extension_template",
+    "query": "Give me a template for a .yaml file",
+    "expected_intent": "generation",
+    "preferred_category": "generate",
+    "expected_source": "knowledge/docker/generate/docker_compose.md"
+  },
+  {
+    "id": "compose_dockerfile_comparison",
+    "query": "What is the difference between Dockerfile and Docker Compose?",
+    "expected_intent": "comparison",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/docker_compose_vs_dockerfile.md"
+  },
+  {
+    "id": "virtual_machine_definition",
+    "query": "What is a virtual machine?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/virtual_machines.md"
+  },
+  {
     "id": "daemon_not_running",
     "query": "Docker daemon is not running",
     "expected_intent": "troubleshooting",
@@ -70,6 +119,13 @@
     "expected_source": "knowledge/docker/troubleshoot/environment_variable_issues.md"
   },
   {
+    "id": "no_space_left",
+    "query": "No space left on device",
+    "expected_intent": "troubleshooting",
+    "preferred_category": "troubleshoot",
+    "expected_source": "knowledge/docker/troubleshoot/no_space_left.md"
+  },
+  {
     "id": "fastapi_dockerfile",
     "query": "Give me a FastAPI Dockerfile template",
     "expected_intent": "generation",
@@ -82,6 +138,20 @@
     "expected_intent": "generation",
     "preferred_category": "generate",
     "expected_source": "knowledge/docker/generate/docker_compose.md"
+  },
+  {
+    "id": "exec_inside_running_container",
+    "query": "How do I see what is happening inside a running container?",
+    "expected_intent": "generation",
+    "preferred_category": "generate",
+    "expected_source": "knowledge/docker/generate/exec_into_container.md"
+  },
+  {
+    "id": "copy_file_into_container",
+    "query": "How do I copy a file from my local machine into a running container?",
+    "expected_intent": "generation",
+    "preferred_category": "generate",
+    "expected_source": "knowledge/docker/generate/copy_files.md"
   },
   {
     "id": "cleanup_commands",

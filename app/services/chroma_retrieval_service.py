@@ -5,6 +5,7 @@ import chromadb
 from app.services.chunking_service import load_knowledge_chunks
 from app.services.embedding_service import DEFAULT_EMBEDDING_PROVIDER, embed_texts
 from app.services.knowledge_service import score_file
+from app.services.query_service import detect_definition_target
 
 
 CHROMA_DIR = Path(".chroma")
@@ -83,6 +84,7 @@ def retrieve_chroma_matches(
     query_embedding = embed_texts([message], provider=embedding_provider)[0]
     where = {"category": preferred_category} if preferred_category else None
     candidate_count = min(collection.count(), max(k * 5, 20))
+    definition_target = detect_definition_target(message)
     result = collection.query(
         query_embeddings=[query_embedding],
         n_results=candidate_count,
@@ -107,7 +109,8 @@ def retrieve_chroma_matches(
                 "content": document,
             },
         )
-        combined_score = semantic_score + min(keyword_score / 200, 1) * 0.25
+        target_boost = 0.5 if definition_target and definition_target in metadata["filename"] else 0
+        combined_score = semantic_score + min(keyword_score / 200, 1) * 0.25 + target_boost
         matches.append(
             {
                 "id": chunk_id,

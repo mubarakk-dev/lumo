@@ -1,5 +1,6 @@
 from app.services.chunking_service import load_knowledge_chunks
 from app.services.embedding_service import EMBEDDING_DIMENSIONS, cosine_similarity, embed_text
+from app.services.query_service import detect_definition_target
 from app.services.vector_store import load_index, save_index
 
 
@@ -45,16 +46,19 @@ def retrieve_semantic_matches(
         records = build_vector_index(topic)
 
     query_embedding = embed_text(message)
+    definition_target = detect_definition_target(message)
     scored_records = []
 
     for record in records:
         if preferred_category is not None and record["category"] != preferred_category:
             continue
 
+        target_boost = 0.5 if definition_target and definition_target in record["filename"] else 0
+
         scored_records.append(
             {
                 **record,
-                "score": cosine_similarity(query_embedding, record["embedding"]),
+                "score": cosine_similarity(query_embedding, record["embedding"]) + target_boost,
             }
         )
 

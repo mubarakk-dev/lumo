@@ -21,6 +21,20 @@
     "expected_source": "knowledge/docker/learn/what_is_dockerfile.md"
   },
   {
+    "id": "docker_image_definition",
+    "query": "What is a Docker image?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/images_vs_containers.md"
+  },
+  {
+    "id": "docker_container_definition",
+    "query": "What is a Docker container?",
+    "expected_intent": "definition",
+    "preferred_category": "learn",
+    "expected_source": "knowledge/docker/learn/images_vs_containers.md"
+  },
+  {
     "id": "daemon_not_running",
     "query": "Docker daemon is not running",
     "expected_intent": "troubleshooting",

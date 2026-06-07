@@ -164,7 +164,7 @@ def build_sources(matches: list[dict]) -> list[dict]:
 def handle_chat(
     message: str,
     retrieval_mode: str = "keyword",
-    embedding_provider: str = "local_hashing",
+    embedding_provider: str = "sentence_transformers",
     response_mode: str = "answer",
     generation_provider: str = "extractive",
 ):

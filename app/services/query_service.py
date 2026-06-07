@@ -89,6 +89,10 @@ def get_retrieval_k(intent: str) -> int:
 DEFINITION_FILE_MAP = {
     "docker compose": "what is docker compose",
     "dockerfile": "what is dockerfile",
+    "docker image": "images vs containers",
+    "docker images": "images vs containers",
+    "docker container": "images vs containers",
+    "docker containers": "images vs containers",
     "docker volumes": "volumes",
     "volumes": "volumes",
     "docker networking": "networking",

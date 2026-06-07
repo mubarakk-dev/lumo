@@ -62,6 +62,28 @@ def score_file(message: str, file_data: dict) -> int:
         if "compose vs dockerfile" in filename:
             score -= 100
 
+    if (
+        "what is a docker image" in message_lower
+        or "what is docker image" in message_lower
+        or "what are docker images" in message_lower
+        or "explain docker image" in message_lower
+    ):
+        if "images vs containers" in filename:
+            score += 220
+        if "what is docker" in filename:
+            score -= 80
+
+    if (
+        "what is a docker container" in message_lower
+        or "what is docker container" in message_lower
+        or "what are docker containers" in message_lower
+        or "explain docker container" in message_lower
+    ):
+        if "images vs containers" in filename:
+            score += 220
+        if "what is docker" in filename:
+            score -= 80
+
     if "daemon not running" in message_lower and "daemon" in filename:
         score += 120
 

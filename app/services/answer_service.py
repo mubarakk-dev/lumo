@@ -5,6 +5,37 @@ HEADING_PATTERN = re.compile(r"^#+\s*(.+)$")
 RELATED_QUESTIONS_HEADING = "related questions"
 
 
+def focus_content_for_query(message: str, content: str) -> str:
+    message_lower = message.lower()
+
+    if (
+        "docker container" in message_lower
+        or "docker containers" in message_lower
+    ):
+        return content_from_heading(content, "container")
+
+    if (
+        "docker image" in message_lower
+        or "docker images" in message_lower
+    ):
+        return content_from_heading(content, "image")
+
+    return content
+
+
+def content_from_heading(content: str, heading_name: str) -> str:
+    target_heading = heading_name.lower()
+    lines = content.splitlines()
+
+    for index, line in enumerate(lines):
+        heading_match = HEADING_PATTERN.match(line.strip())
+
+        if heading_match and heading_match.group(1).strip().lower() == target_heading:
+            return "\n".join(lines[index:])
+
+    return content
+
+
 def compact_lines(text: str, max_lines: int = 10) -> list[str]:
     lines = []
     skipping_related_questions = False
@@ -63,7 +94,8 @@ def build_grounded_answer(
 
         seen_paths.add(match["path"])
         label = source_label(source_indexes.get(match["path"], 0))
-        lines = compact_lines(match["content"], max_lines=get_max_lines_for_intent(intent))
+        focused_content = focus_content_for_query(message, match["content"])
+        lines = compact_lines(focused_content, max_lines=get_max_lines_for_intent(intent))
 
         if not lines:
             continue

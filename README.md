@@ -160,7 +160,7 @@ The public demo is designed to run as a Streamlit app without a separate FastAPI
 
 ```text
 retrieval_mode = chroma
-embedding_provider = local_hashing
+embedding_provider = sentence_transformers
 response_mode = answer
 generation_provider = extractive
 ```

@@ -79,6 +79,38 @@ class ApiTests(unittest.TestCase):
         self.assertIn("package applications", data["answer"])
         self.assertIn("containers", data["answer"])
 
+    def test_chroma_retrieval_routes_docker_image_definition(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is a Docker image?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "definition")
+        self.assertEqual(data["embedding_provider"], "sentence_transformers")
+        self.assertIn("images_vs_containers.md", data["sources"][0]["path"])
+        self.assertIn("read-only template", data["answer"])
+
+    def test_chroma_retrieval_routes_docker_container_definition(self):
+        response = self.client.post(
+            "/chat",
+            json={
+                "message": "What is a Docker container?",
+                "retrieval_mode": "chroma",
+            },
+        )
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["intent"], "definition")
+        self.assertEqual(data["embedding_provider"], "sentence_transformers")
+        self.assertIn("images_vs_containers.md", data["sources"][0]["path"])
+        self.assertIn("running instance", data["answer"])
+
     def test_chat_endpoint_supports_retrieval_response_mode(self):
         response = self.client.post(
             "/chat",
@@ -121,7 +153,7 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["retrieval_mode"], "chroma")
-        self.assertEqual(data["embedding_provider"], "local_hashing")
+        self.assertEqual(data["embedding_provider"], "sentence_transformers")
         self.assertEqual(data["intent"], "troubleshooting")
         self.assertTrue(data["sources"])
 

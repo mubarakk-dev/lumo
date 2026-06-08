@@ -85,8 +85,9 @@ class ApiTests(unittest.TestCase):
         data = response.json()
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("package applications", data["answer"])
-        self.assertIn("containers", data["answer"])
+        self.assertIn("packaging an application", data["answer"])
+        self.assertIn("physical shipping container", data["answer"])
+        self.assertIn("consistent environment", data["answer"])
 
     def test_chroma_retrieval_routes_docker_image_definition(self):
         response = self.client.post(
@@ -178,6 +179,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["intent"], "generation")
         self.assertIn("docker_compose.md", data["sources"][0]["path"])
+        self.assertIn("[1]\n```yaml", data["answer"])
         self.assertIn("services:", data["answer"])
 
     def test_chroma_retrieval_routes_yaml_extension_template_generation(self):
@@ -193,6 +195,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["intent"], "generation")
         self.assertIn("docker_compose.md", data["sources"][0]["path"])
+        self.assertIn("[1]\n```yaml", data["answer"])
         self.assertIn("services:", data["answer"])
 
     def test_chroma_retrieval_routes_no_space_left_to_pruning_fix(self):
@@ -208,9 +211,9 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["intent"], "troubleshooting")
         self.assertIn("no_space_left.md", data["sources"][0]["path"])
-        self.assertIn("**Problem**", data["answer"])
-        self.assertIn("**Cause**", data["answer"])
-        self.assertIn("**Fix**", data["answer"])
+        self.assertIn("**Problem:**", data["answer"])
+        self.assertIn("**Cause:**", data["answer"])
+        self.assertIn("**Fix:**", data["answer"])
         self.assertIn("docker system prune", data["answer"])
 
     def test_chroma_retrieval_routes_compose_dockerfile_comparison(self):

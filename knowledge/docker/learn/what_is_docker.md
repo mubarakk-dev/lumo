@@ -2,142 +2,22 @@
 
 ## Definition
 
-Docker is a platform that allows developers to package applications and their dependencies into containers.
+Docker is a platform for packaging an application with everything it needs to run, such as its code, libraries, runtime, and configuration.
 
-A container includes:
-- application code
-- libraries
-- dependencies
-- runtime
-- configuration
+The package is called a container. A container gives the application a consistent environment, so it can run the same way on a laptop, another developer's machine, or a cloud server.
 
-This makes applications portable and consistent across environments.
+## Real-World Analogy
 
----
+Think of Docker like a physical shipping container.
 
-# Analogy
+A shipping container has a standard shape, so ships, trucks, cranes, and ports can move it without caring what is inside.
 
-Think of Docker like a shipping container.
+Docker does something similar for software. Once an application is packaged into a container, different computers can run it in a predictable way without manually recreating the environment each time.
 
-No matter what is inside, the container can be transported and run consistently anywhere:
-- your laptop
-- another developer's machine
-- a cloud server
+## Mental Model
 
----
+An image is the packaged template.
 
-# Core Concepts
+A container is the running application created from that image.
 
-## Image
-
-An image is a blueprint or template.
-
-It contains:
-- operating system layers
-- dependencies
-- application code
-
-Images are read-only.
-
-Example:
-```bash
-docker pull nginx
-```
-
----
-
-## Container
-
-A container is a running instance of an image.
-
-You can:
-- start it
-- stop it
-- remove it
-
-Example:
-```bash
-docker run nginx
-```
-
----
-
-## Dockerfile
-
-A Dockerfile contains instructions for building an image.
-
-Example:
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY . .
-
-RUN pip install -r requirements.txt
-
-CMD ["python", "app.py"]
-```
-
----
-
-# Why Docker is Useful
-
-## Consistency
-
-Works the same across environments.
-
-## Isolation
-
-Applications run independently.
-
-## Portability
-
-Containers can run almost anywhere.
-
-## Scalability
-
-Easy to deploy multiple containers.
-
----
-
-# Common Beginner Mistakes
-
-- Confusing images with containers
-- Forgetting port mapping
-- Running commands from the wrong folder
-- Forgetting to rebuild images after code changes
-
----
-
-# Important Commands
-
-## Pull image
-```bash
-docker pull nginx
-```
-
-## Run container
-```bash
-docker run nginx
-```
-
-## List running containers
-```bash
-docker ps
-```
-
-## Stop container
-```bash
-docker stop container_name
-```
-
----
-
-# Mental Model
-
-## Image vs Container
-
-Image = recipe
-
-Container = actual meal created from the recipe
+Docker helps developers build, move, and run those containers consistently.

@@ -6,7 +6,7 @@
     "embedding_provider": "local_hashing",
     "generation_provider": "extractive",
     "expected_source": "knowledge/docker/learn/what_is_docker.md",
-    "required_terms": ["package applications", "containers"],
+    "required_terms": ["packaging an application", "physical shipping container", "consistent environment"],
     "required_citations": ["[1]"]
   },
   {

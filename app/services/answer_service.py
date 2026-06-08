@@ -209,17 +209,21 @@ def format_troubleshooting_answer(label: str, content: str) -> str:
         fix = ["The retrieved source does not include a specific fix yet."]
 
     parts = [
-        f"{label} **Problem**",
-        *problem,
+        format_labeled_lines(f"{label} **Problem:**", problem),
         "",
-        "**Cause**",
-        *cause,
+        format_labeled_lines("**Cause:**", cause),
         "",
-        "**Fix**",
-        *fix,
+        format_labeled_lines("**Fix:**", fix),
     ]
 
     return "\n".join(parts).strip()
+
+
+def format_labeled_lines(label: str, lines: list[str]) -> str:
+    if not lines:
+        return label
+
+    return "\n".join([f"{label} {lines[0]}", *lines[1:]])
 
 
 def source_label(index: int) -> str:
@@ -280,6 +284,9 @@ def get_max_lines_for_intent(intent: str) -> int:
 def format_answer_block(label: str, lines: list[str]) -> str:
     first_line = lines[0]
     remaining_lines = lines[1:]
+
+    if first_line.startswith("```"):
+        return f"{label}\n" + "\n".join(lines)
 
     if not remaining_lines:
         return f"{label} {first_line}"

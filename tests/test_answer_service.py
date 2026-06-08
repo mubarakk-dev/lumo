@@ -28,10 +28,10 @@ class AnswerServiceTests(unittest.TestCase):
             intent="troubleshooting",
         )
 
-        self.assertTrue(answer.startswith("[1] **Problem**"))
+        self.assertTrue(answer.startswith("[1] **Problem:** Docker service is not running"))
         self.assertIn("Docker service is not running", answer)
-        self.assertIn("**Cause**", answer)
-        self.assertIn("**Fix**", answer)
+        self.assertIn("**Cause:**", answer)
+        self.assertIn("**Fix:**", answer)
         self.assertIn("Open Docker Desktop", answer)
         self.assertNotIn("Docker Daemon Not Running", answer)
         self.assertNotIn("Sources:", answer)
@@ -141,12 +141,38 @@ class AnswerServiceTests(unittest.TestCase):
             intent="troubleshooting",
         )
 
-        self.assertIn("[1] **Problem**", answer)
+        self.assertIn("[1] **Problem:** Docker has no disk space left.", answer)
         self.assertIn("Docker has no disk space left.", answer)
-        self.assertIn("**Cause**", answer)
+        self.assertIn("**Cause:**", answer)
         self.assertIn("Unused images and volumes accumulated.", answer)
-        self.assertIn("**Fix**", answer)
+        self.assertIn("**Fix:**", answer)
         self.assertIn("docker system prune", answer)
+
+    def test_code_block_can_start_after_source_label(self):
+        matches = [
+            {
+                "content": "# YAML Template\n\n## Example\n\n```yaml\nservices:\n  web:\n    image: nginx\n```",
+                "path": "knowledge/docker/generate/docker_compose.md",
+                "category": "generate",
+                "score": 1.0,
+            }
+        ]
+        sources = [
+            {
+                "path": "knowledge/docker/generate/docker_compose.md",
+                "category": "generate",
+                "score": 1.0,
+            }
+        ]
+
+        answer = build_grounded_answer(
+            message="Give me a YAML file template",
+            matches=matches,
+            sources=sources,
+            intent="generation",
+        )
+
+        self.assertTrue(answer.startswith("[1]\n```yaml"))
 
 
 if __name__ == "__main__":
